@@ -14,7 +14,9 @@ window.APP_CONFIG = {
   SUPABASE_ANON_KEY: "sb_publishable_GY7YWCQ7EHGbuyDYdbDXww_r60wNzPS",
   // Davet ekranını görebilecek admin e-postaları
   ADMIN_EMAILS: [
-    "ayktcntrk@gmail.com"
+    "ayktcntrk@gmail.com",
+    "slckcntrk@gmail.com",
+    "selcukcr@gmail.com"
   ],
   // Şifre sıfırlama mailindeki dönüş adresi (production URL)
   RESET_PASSWORD_REDIRECT_TO: "https://aykut-canturk.github.io/",
