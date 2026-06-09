@@ -25,17 +25,16 @@
   }
   .hidden{display:none !important}
 
-  header{
-    width:100%;max-width:640px;display:flex;align-items:center;
-    justify-content:space-between;gap:16px;margin:8px 0 4px;
-  }
+  header{width:100%;max-width:640px;display:flex;align-items:center;
+    justify-content:space-between;gap:16px;margin:8px 0 4px}
   .brand{display:flex;align-items:center;gap:10px}
   .brand .logo{font-size:30px;line-height:1}
   .brand h1{font-family:"Fredoka",sans-serif;font-weight:600;font-size:1.5rem;letter-spacing:.3px}
-  .user-box{display:flex;align-items:center;gap:10px;font-weight:700;font-size:.95rem;color:var(--ink-soft)}
-  .logout{border:none;background:#EAF4F0;color:var(--leaf-dark);cursor:pointer;
-    font-family:"Nunito";font-weight:800;font-size:.85rem;padding:8px 14px;border-radius:999px}
-  .logout:hover{background:#DCEDE6}
+  .user-box{display:flex;align-items:center;gap:8px;font-weight:700;font-size:.92rem;color:var(--ink-soft)}
+  .user-box .name{margin-right:4px}
+  .pill{border:none;background:#EAF4F0;color:var(--leaf-dark);cursor:pointer;
+    font-family:"Nunito";font-weight:800;font-size:.82rem;padding:8px 13px;border-radius:999px}
+  .pill:hover{background:#DCEDE6}
 
   main{width:100%;max-width:640px;background:var(--card);border-radius:32px;
     box-shadow:var(--shadow);padding:40px 32px 36px;margin-top:18px;text-align:center}
@@ -55,8 +54,9 @@
   .btn-primary:hover{background:var(--leaf-dark)}
   .btn-primary:active{transform:scale(.98)}
   .btn-primary:disabled{opacity:.6;cursor:default}
-  .switch{margin-top:18px;font-weight:700;color:var(--ink-soft);font-size:.95rem}
-  .switch a{color:var(--leaf-dark);cursor:pointer;text-decoration:underline}
+  .linkrow{margin-top:14px;font-weight:700;font-size:.92rem}
+  .linkrow a, .switch a{color:var(--leaf-dark);cursor:pointer;text-decoration:underline}
+  .switch{margin-top:14px;font-weight:700;color:var(--ink-soft);font-size:.95rem}
   .msg{margin-top:14px;font-weight:700;font-size:.95rem;min-height:20px}
   .msg.err{color:var(--tryagain)} .msg.ok{color:var(--success)}
 
@@ -116,22 +116,25 @@
       <h1>Sayı Bahçesi</h1>
     </div>
     <div class="user-box hidden" id="userBox">
-      <span id="userName"></span>
-      <button class="logout" id="logoutBtn" type="button">Çıkış</button>
+      <span class="name" id="userName"></span>
+      <button class="pill" id="changePwBtn" type="button">Şifre</button>
+      <button class="pill" id="logoutBtn" type="button">Çıkış</button>
     </div>
   </header>
 
+  <!-- SETUP -->
   <main class="auth-card setup hidden" id="setupView">
     <h2>🔧 Kurulum gerekli</h2>
     <p>Giriş sisteminin çalışması için Supabase bilgilerinizi eklemeniz gerekiyor.</p>
     <ol>
       <li><b>supabase.com</b>'da ücretsiz bir proje açın.</li>
-      <li>Project Settings → API'den <code>Project URL</code> ve <code>anon key</code>'i kopyalayın.</li>
+      <li>Settings → API (veya Data API)'den <code>Project URL</code> ve <code>anon/publishable</code> anahtarını kopyalayın.</li>
       <li>Bu dosyadaki <code>SUPABASE_URL</code> ve <code>SUPABASE_ANON_KEY</code> satırlarına yapıştırın.</li>
       <li>SQL Editor'de tabloyu ve güvenlik kurallarını oluşturun (kod dosyanın içinde yorum olarak var).</li>
     </ol>
   </main>
 
+  <!-- AUTH (login / signup / forgot) -->
   <main class="auth-card hidden" id="authView">
     <p class="eyebrow" id="authEyebrow">Hoş geldin</p>
     <h2 class="auth-title" id="authTitle">Giriş yap</h2>
@@ -145,16 +148,32 @@
       <label for="email">E-posta</label>
       <input id="email" type="email" autocomplete="email" placeholder="ornek@eposta.com">
     </div>
-    <div class="field">
+    <div class="field" id="passwordField">
       <label for="password">Şifre</label>
       <input id="password" type="password" autocomplete="current-password" placeholder="••••••••">
     </div>
 
     <button class="btn-primary" id="authBtn" type="button">Giriş yap</button>
     <p class="msg" id="authMsg"></p>
+    <p class="linkrow" id="forgotRow"><a id="forgotLink">Şifremi unuttum?</a></p>
     <p class="switch" id="authSwitch">Hesabın yok mu? <a id="switchLink">Kayıt ol</a></p>
   </main>
 
+  <!-- SET NEW PASSWORD (recovery link or in-app change) -->
+  <main class="auth-card hidden" id="resetView">
+    <p class="eyebrow">Güvenlik</p>
+    <h2 class="auth-title" id="resetTitle">Yeni şifre belirle</h2>
+    <p class="auth-sub" id="resetSub">En az 6 karakter</p>
+    <div class="field">
+      <label for="newpass">Yeni şifre</label>
+      <input id="newpass" type="password" autocomplete="new-password" placeholder="••••••••">
+    </div>
+    <button class="btn-primary" id="resetBtn" type="button">Şifreyi kaydet</button>
+    <p class="msg" id="resetMsg"></p>
+    <p class="linkrow"><a id="resetBack">← Geri</a></p>
+  </main>
+
+  <!-- GAME -->
   <main class="hidden" id="appView">
     <div class="garden" id="garden" aria-label="Topladığın çiçekler"></div>
     <p class="eyebrow" id="eyebrow">1. Soru</p>
@@ -185,27 +204,25 @@ const SUPABASE_ANON_KEY = "sb_publishable_GY7YWCQ7EHGbuyDYdbDXww_r60wNzPS";     
      total_answered int not null default 0,
      updated_at timestamptz not null default now()
    );
-
    alter table student_progress enable row level security;
+   create policy "kendi kaydini gor"      on student_progress for select using (auth.uid() = user_id);
+   create policy "kendi kaydini ekle"     on student_progress for insert with check (auth.uid() = user_id);
+   create policy "kendi kaydini guncelle" on student_progress for update using (auth.uid() = user_id);
 
-   create policy "kendi kaydini gor"      on student_progress
-     for select using (auth.uid() = user_id);
-   create policy "kendi kaydini ekle"     on student_progress
-     for insert with check (auth.uid() = user_id);
-   create policy "kendi kaydini guncelle" on student_progress
-     for update using (auth.uid() = user_id);
-
-   -- Demoda kolaylık için: Authentication > Providers > Email
-   -- altından "Confirm email" kapatılabilir.
+   3) ŞİFRE SIFIRLAMA İÇİN: Authentication > URL Configuration bölümüne
+      sitenizin adresini "Redirect URLs" olarak ekleyin
+      (örn: https://kullaniciadi.github.io/repo-adi/).
    ============================================================ */
 
 const configured = SUPABASE_URL.startsWith("http") && SUPABASE_ANON_KEY.length > 20;
 const $ = id => document.getElementById(id);
-const views = { setup:$("setupView"), auth:$("authView"), app:$("appView"), footer:$("footer"), userBox:$("userBox") };
+const views = { setup:$("setupView"), auth:$("authView"), reset:$("resetView"),
+                app:$("appView"), footer:$("footer"), userBox:$("userBox") };
 
 function show(name){
   views.setup.classList.toggle("hidden", name!=="setup");
   views.auth.classList.toggle("hidden",  name!=="auth");
+  views.reset.classList.toggle("hidden", name!=="reset");
   views.app.classList.toggle("hidden",   name!=="app");
   views.footer.classList.toggle("hidden", name!=="app");
   views.userBox.classList.toggle("hidden", name!=="app");
@@ -215,24 +232,17 @@ if(!configured){ show("setup"); }
 else{ startAuth(window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)); }
 
 function startAuth(sb){
-  let mode="login";
-  const els={ eyebrow:$("authEyebrow"), title:$("authTitle"), sub:$("authSub"),
-    nameField:$("nameField"), name:$("name"), email:$("email"), password:$("password"),
-    btn:$("authBtn"), msg:$("authMsg"), switchText:$("authSwitch") };
+  let mode = "login";                 // login | signup | forgot
+  let recovering = window.location.hash.includes("type=recovery");
+  let appStarted = false;
+  let resetFromRecovery = false;
 
-  function renderMode(){
-    if(mode==="login"){
-      els.eyebrow.textContent="Hoş geldin"; els.title.textContent="Giriş yap";
-      els.sub.textContent="Kaldığın yerden devam et"; els.nameField.style.display="none";
-      els.btn.textContent="Giriş yap"; els.switchText.innerHTML='Hesabın yok mu? <a id="switchLink">Kayıt ol</a>';
-    } else {
-      els.eyebrow.textContent="Aramıza katıl"; els.title.textContent="Kayıt ol";
-      els.sub.textContent="Yeni bir bahçe başlat"; els.nameField.style.display="block";
-      els.btn.textContent="Kayıt ol"; els.switchText.innerHTML='Zaten hesabın var mı? <a id="switchLink">Giriş yap</a>';
-    }
-    els.msg.textContent=""; els.msg.className="msg";
-    $("switchLink").addEventListener("click", ()=>{ mode=(mode==="login")?"signup":"login"; renderMode(); });
-  }
+  const els = { eyebrow:$("authEyebrow"), title:$("authTitle"), sub:$("authSub"),
+    nameField:$("nameField"), name:$("name"), email:$("email"),
+    passwordField:$("passwordField"), password:$("password"),
+    btn:$("authBtn"), msg:$("authMsg"), switchText:$("authSwitch"),
+    forgotRow:$("forgotRow") };
+
   function setMsg(t,type){ els.msg.textContent=t; els.msg.className="msg "+(type||""); }
   function translateError(m){
     if(/Invalid login/i.test(m)) return "E-posta veya şifre hatalı.";
@@ -241,11 +251,48 @@ function startAuth(sb){
     return m;
   }
 
+  function renderMode(){
+    els.msg.textContent=""; els.msg.className="msg";
+    if(mode==="login"){
+      els.eyebrow.textContent="Hoş geldin"; els.title.textContent="Giriş yap";
+      els.sub.textContent="Kaldığın yerden devam et";
+      els.nameField.style.display="none"; els.passwordField.style.display="block";
+      els.btn.textContent="Giriş yap"; els.forgotRow.style.display="block";
+      els.switchText.innerHTML='Hesabın yok mu? <a id="switchLink">Kayıt ol</a>';
+    } else if(mode==="signup"){
+      els.eyebrow.textContent="Aramıza katıl"; els.title.textContent="Kayıt ol";
+      els.sub.textContent="Yeni bir bahçe başlat";
+      els.nameField.style.display="block"; els.passwordField.style.display="block";
+      els.btn.textContent="Kayıt ol"; els.forgotRow.style.display="none";
+      els.switchText.innerHTML='Zaten hesabın var mı? <a id="switchLink">Giriş yap</a>';
+    } else { // forgot
+      els.eyebrow.textContent="Şifre sıfırlama"; els.title.textContent="Şifremi unuttum";
+      els.sub.textContent="E-postana sıfırlama bağlantısı gönderelim";
+      els.nameField.style.display="none"; els.passwordField.style.display="none";
+      els.btn.textContent="Bağlantı gönder"; els.forgotRow.style.display="none";
+      els.switchText.innerHTML='<a id="switchLink">← Girişe dön</a>';
+    }
+    const sl=$("switchLink");
+    if(sl) sl.addEventListener("click", ()=>{
+      mode = (mode==="login") ? "signup" : "login"; renderMode();
+    });
+  }
+
+  $("forgotLink").addEventListener("click", ()=>{ mode="forgot"; renderMode(); });
+
   async function handleSubmit(){
     const email=els.email.value.trim(), password=els.password.value;
-    if(!email || !password){ setMsg("E-posta ve şifre gerekli.","err"); return; }
+    if(!email){ setMsg("E-posta gerekli.","err"); return; }
     els.btn.disabled=true;
     try{
+      if(mode==="forgot"){
+        const redirectTo = window.location.origin + window.location.pathname;
+        const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo });
+        if(error) throw error;
+        setMsg("Sıfırlama bağlantısı e-postana gönderildi. 📬","ok");
+        els.btn.disabled=false; return;
+      }
+      if(!password){ setMsg("Şifre gerekli.","err"); els.btn.disabled=false; return; }
       if(mode==="signup"){
         const name=els.name.value.trim();
         const { data, error } = await sb.auth.signUp({ email, password });
@@ -261,11 +308,57 @@ function startAuth(sb){
 
   els.btn.addEventListener("click", handleSubmit);
   els.password.addEventListener("keydown", e=>{ if(e.key==="Enter") handleSubmit(); });
-  $("logoutBtn").addEventListener("click", ()=> sb.auth.signOut());
+  els.email.addEventListener("keydown", e=>{ if(e.key==="Enter" && mode==="forgot") handleSubmit(); });
 
-  sb.auth.onAuthStateChange((_e, session)=>{
-    if(session && session.user){ enterApp(sb, session.user); }
-    else { renderMode(); show("auth"); }
+  // ---- Yeni şifre belirleme ekranı ----
+  function showNewPass(fromRecovery){
+    resetFromRecovery = fromRecovery;
+    $("resetTitle").textContent = fromRecovery ? "Yeni şifre belirle" : "Şifreyi değiştir";
+    $("resetSub").textContent   = "En az 6 karakter";
+    $("newpass").value = "";
+    $("resetMsg").textContent = ""; $("resetMsg").className = "msg";
+    $("resetBtn").disabled = false;
+    show("reset");
+  }
+  function setResetMsg(t,type){ $("resetMsg").textContent=t; $("resetMsg").className="msg "+(type||""); }
+
+  async function saveNewPassword(){
+    const p = $("newpass").value;
+    if(p.length < 6){ setResetMsg("Şifre en az 6 karakter olmalı.","err"); return; }
+    $("resetBtn").disabled = true;
+    try{
+      const { error } = await sb.auth.updateUser({ password: p });
+      if(error) throw error;
+      if(resetFromRecovery){
+        recovering=false;
+        history.replaceState(null,"",window.location.pathname);
+        const { data } = await sb.auth.getUser();
+        appStarted = true; enterApp(sb, data.user);
+      } else {
+        setResetMsg("Şifren güncellendi! ✅","ok");
+        setTimeout(()=> show("app"), 900);
+      }
+    }catch(err){ setResetMsg(translateError(err.message),"err"); $("resetBtn").disabled=false; }
+  }
+  $("resetBtn").addEventListener("click", saveNewPassword);
+  $("newpass").addEventListener("keydown", e=>{ if(e.key==="Enter") saveNewPassword(); });
+  $("resetBack").addEventListener("click", ()=>{
+    if(resetFromRecovery){ sb.auth.signOut(); }   // → girişe döner
+    else { show("app"); }                          // oyuna geri (durum korunur)
+  });
+
+  // ---- Header butonları ----
+  $("logoutBtn").addEventListener("click", ()=> sb.auth.signOut());
+  $("changePwBtn").addEventListener("click", ()=> showNewPass(false));
+
+  // ---- Oturum takibi ----
+  sb.auth.onAuthStateChange((event, session)=>{
+    if(event==="PASSWORD_RECOVERY"){ recovering=true; appStarted=false; showNewPass(true); return; }
+    if(event==="SIGNED_OUT" || !session){ recovering=false; appStarted=false; mode="login"; renderMode(); show("auth"); return; }
+    // oturum var:
+    if(recovering){ showNewPass(true); return; }
+    if(!appStarted){ appStarted=true; enterApp(sb, session.user); }
+    // USER_UPDATED / TOKEN_REFRESHED: oyun zaten açık, görmezden gel
   });
 }
 
@@ -356,7 +449,7 @@ async function enterApp(sb, user){
 
   function growFlower(){
     const slot=slots[bloom];
-    slot.textContent=FLOWERS[bloom%FLOWERS.length]; slot.classList.add("bloom");
+    slot.textContent=FLOWERS[bloom%GARDEN_SIZE]; slot.classList.add("bloom");
     bloom++;
     if(bloom>=GARDEN_SIZE){
       bannerEl.classList.add("show");
