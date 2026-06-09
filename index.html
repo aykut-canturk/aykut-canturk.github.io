@@ -813,10 +813,11 @@
       <div class="stat-item wrong">✗ <span id="wrongCount">0</span></div>
     </div>
     <button class="btn btn-icon" id="soundToggleBtn" aria-label="Ses" title="Sesi aç/kapat">🔊</button>
-    <button class="btn btn-icon" id="settingsBtn" aria-label="Ayarlar" title="Ayarlar">⚙️</button>
+    <button class="btn btn-icon" id="settingsBtn" aria-label="Ayarlar" title="Ayarlar" style="display:none;">⚙️</button>
     <div id="authControls" style="display:none; align-items:center; gap:8px;">
       <span id="tbUserName" style="color:#fff; font-weight:700; font-size:14px; text-shadow:1px 1px 0 var(--lego-black); max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></span>
       <button class="btn btn-icon" id="progressBtn" aria-label="Gelişimim" title="Gelişimim">📈</button>
+      <button class="btn btn-icon" id="inviteBtnTB" aria-label="Kullanıcı davet et" title="Kullanıcı davet et" style="display:none;">✉️</button>
       <button class="btn btn-icon" id="changePwBtnTB" aria-label="Şifre" title="Şifreyi değiştir">🔑</button>
       <button class="btn btn-icon" id="logoutBtnTB" aria-label="Çıkış" title="Çıkış">🚪</button>
     </div>
@@ -856,6 +857,7 @@
         <button class="tab active" data-tab="groups">📁 Gruplar (<span id="groupCountBadge">0</span>)</button>
         <button class="tab" data-tab="add">➕ Soru Ekle</button>
         <button class="tab" data-tab="list">📋 Sorular (<span id="questionCountBadge">0</span>)</button>
+        <button class="tab" data-tab="users">👥 Kullanıcılar</button>
         <button class="tab" data-tab="data">💾 Veri</button>
         <button class="tab" data-tab="settings">🔧 Ayarlar</button>
       </div>
@@ -947,6 +949,15 @@
           <select class="form-select" id="filterGroup" style="width: auto; flex: 1; max-width: 280px;"></select>
         </div>
         <div id="questionsList" class="item-list"></div>
+      </div>
+
+      <!-- KULLANICILAR -->
+      <div class="tab-content" id="tab-users">
+        <div class="filter-bar" style="justify-content: space-between;">
+          <label>Supabase kullanıcı listesi</label>
+          <button class="btn btn-secondary" id="refreshUsersBtn" style="padding: 8px 14px; font-size: 13px;">Yenile</button>
+        </div>
+        <div id="usersList" class="item-list"></div>
       </div>
 
       <!-- VERİ -->
@@ -1067,7 +1078,7 @@
 
       <div class="auth-msg" id="authMsg"></div>
       <div class="auth-links" id="forgotRow"><a id="forgotLink">Şifremi unuttum?</a></div>
-      <div class="auth-links" id="switchRow">Hesabın yok mu? <a id="switchLink">Kayıt ol</a></div>
+      <div class="auth-links" id="switchRow">Hesabın yoksa yöneticiden davet iste.</div>
     </div>
 
     <!-- Yeni şifre belirleme -->
@@ -1097,6 +1108,32 @@
     </div>
     <div class="modal-body" id="progressBody">
       <div style="text-align:center; padding:30px; color:var(--on-surface-variant);">Yükleniyor…</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== DAVET MODALI (YALNIZCA ADMIN) ===================== -->
+<div class="modal-overlay" id="inviteModal">
+  <div class="modal" style="max-width:460px;">
+    <div class="modal-header">
+      <h2>✉️ Kullanıcı Davet Et</h2>
+      <button class="btn btn-icon" id="inviteCloseBtn" aria-label="Kapat">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="inviteEmailInput">E-posta</label>
+        <input class="form-input" id="inviteEmailInput" type="email" placeholder="ogrenci@ornek.com" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label for="inviteNameInput">Ad Soyad (opsiyonel)</label>
+        <input class="form-input" id="inviteNameInput" type="text" placeholder="Örn: Ayşe Yılmaz" autocomplete="off">
+      </div>
+      <p style="font-size:13px; color:var(--on-surface-variant); margin-bottom:12px;">Davet e-postası gönderilir. Kullanıcı kayıt bağlantısıyla hesabını tamamlar.</p>
+      <div id="inviteMsg" class="auth-msg"></div>
+      <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:8px;">
+        <button class="btn btn-secondary" id="inviteCancelBtn" type="button">İptal</button>
+        <button class="btn btn-primary" id="inviteSubmitBtn" type="button">Davet Gönder</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1697,11 +1734,16 @@
       this.initQuestionForm();
       this.initImageUpload();
       this.initFilter();
+      this.initUsersTab();
       this.initDataTab();
       this.initSettingsTab();
     },
     requestOpen() {
-      PinModal.open(() => this.open());
+      if (window.__authIsAdmin === true) {
+        this.open();
+        return;
+      }
+      Toast.show('Bu alan sadece yönetici kullanıcılar içindir.', 'error');
     },
     open() {
       this.modal.classList.add('visible');
@@ -1719,6 +1761,9 @@
       document.querySelectorAll('.tab-content').forEach(c => {
         c.classList.toggle('active', c.id === 'tab-' + tabName);
       });
+      if (tabName === 'users') {
+        this.refreshUsersList();
+      }
     },
     refreshAll() {
       this.refreshGroupsList();
@@ -1729,6 +1774,51 @@
       this.renderColorPicker();
       document.getElementById('groupCountBadge').textContent = state.groups.length;
       document.getElementById('questionCountBadge').textContent = state.questions.length;
+    },
+
+    initUsersTab() {
+      document.getElementById('refreshUsersBtn').addEventListener('click', () => this.refreshUsersList());
+    },
+    async refreshUsersList() {
+      const list = document.getElementById('usersList');
+      list.innerHTML = '<div style="text-align:center; padding:24px; color: var(--on-surface-variant);">Yükleniyor…</div>';
+
+      try {
+        if (!window.__authClient || !window.__authClient.functions) {
+          throw new Error('Oturum istemcisi hazır değil');
+        }
+
+        const fnName = (window.APP_CONFIG && window.APP_CONFIG.LIST_USERS_FUNCTION_NAME) || 'list-users';
+        const res = await window.__authClient.functions.invoke(fnName, { body: {} });
+        if (res.error) throw res.error;
+
+        const payload = res.data || {};
+        const users = Array.isArray(payload.users) ? payload.users : (Array.isArray(payload) ? payload : []);
+
+        if (!users.length) {
+          list.innerHTML = '<div style="text-align:center; padding:24px; color: var(--on-surface-variant);">Kullanıcı bulunamadı.</div>';
+          return;
+        }
+
+        list.innerHTML = users.map(u => {
+          const email = Util.escapeHtml(u.email || '—');
+          const fullName = Util.escapeHtml((u.user_metadata && u.user_metadata.display_name) || u.full_name || '—');
+          const createdAt = Util.escapeHtml((u.created_at || '').slice(0, 10) || '—');
+          const lastSignIn = Util.escapeHtml((u.last_sign_in_at || '').slice(0, 10) || '—');
+          const status = u.banned_until ? 'Askıda' : 'Aktif';
+
+          return '<div class="list-item">' +
+            '<div class="thumb">👤</div>' +
+            '<div class="info">' +
+              '<div class="item-title">' + fullName + '</div>' +
+              '<div class="item-subtitle">' + email + '</div>' +
+              '<div class="item-subtitle" style="margin-top:4px;">Durum: <strong>' + status + '</strong> · Kayıt: ' + createdAt + ' · Son giriş: ' + lastSignIn + '</div>' +
+            '</div>' +
+          '</div>';
+        }).join('');
+      } catch (err) {
+        list.innerHTML = '<div style="text-align:center; padding:24px; color: var(--lego-red); font-weight:700;">Kullanıcı listesi alınamadı: ' + Util.escapeHtml((err && err.message) || 'Hata') + '</div>';
+      }
     },
 
     // ----- GRUP FORM -----
@@ -2343,13 +2433,23 @@
       create policy "sorulari oku" on quiz_questions for select to authenticated using (true);
       create policy "sorulari yaz" on quiz_questions for all    to authenticated using (true) with check (true);
 
-   3) Şifre sıfırlama için Authentication > URL Configuration bölümüne
+  3) Authentication > Providers > Email bölümünde "Enable email signups"
+    seçeneğini kapatın (self-signup kapalı olmalı).
+
+  4) Şifre sıfırlama için Authentication > URL Configuration bölümüne
       sitenizin adresini "Redirect URLs" olarak ekleyin
       (örn. https://kullaniciadi.github.io/repo-adi/).
+
+  5) Admin işlemleri için Supabase Edge Function'lar oluşturun:
+    - invite-user: service_role ile auth.admin.inviteUserByEmail çağırmalı
+    - list-users: service_role ile auth.admin.listUsers çağırmalı
    ===================================================================== */
 
 const SUPABASE_URL      = (window.APP_CONFIG && window.APP_CONFIG.SUPABASE_URL)      || "BURAYA_SUPABASE_URL";   // config.js'ten okunur
 const SUPABASE_ANON_KEY = (window.APP_CONFIG && window.APP_CONFIG.SUPABASE_ANON_KEY) || "BURAYA_ANON_KEY";       // config.js'ten okunur
+const ADMIN_EMAILS      = (window.APP_CONFIG && Array.isArray(window.APP_CONFIG.ADMIN_EMAILS)) ? window.APP_CONFIG.ADMIN_EMAILS : [];
+const INVITE_FUNCTION_NAME = (window.APP_CONFIG && window.APP_CONFIG.INVITE_FUNCTION_NAME) || "invite-user";
+const LIST_USERS_FUNCTION_NAME = (window.APP_CONFIG && window.APP_CONFIG.LIST_USERS_FUNCTION_NAME) || "list-users";
 
 (function () {
   'use strict';
@@ -2369,21 +2469,34 @@ const SUPABASE_ANON_KEY = (window.APP_CONFIG && window.APP_CONFIG.SUPABASE_ANON_
   }
 
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  window.__authClient = sb;
+  window.__authIsAdmin = false;
 
-  let mode = "login";                         // login | signup | forgot
+  let mode = "login";                         // login | forgot
   let recovering = window.location.hash.indexOf("type=recovery") !== -1;
   let started = false;
   let resetFromRecovery = false;
   let currentUser = null;
+
+  function normalizeEmail(e){ return String(e || "").trim().toLowerCase(); }
+  function isAdminUser(email){ return ADMIN_EMAILS.map(normalizeEmail).includes(normalizeEmail(email)); }
+  function syncAdminVisibility(user){
+    const isAdmin = !!(user && isAdminUser(user.email));
+    window.__authIsAdmin = isAdmin;
+    $("inviteBtnTB").style.display = isAdmin ? "inline-flex" : "none";
+    $("settingsBtn").style.display = isAdmin ? "inline-flex" : "none";
+  }
 
   /* ---------- Görünüm yardımcıları ---------- */
   function showForms(){ formsView.style.display="block"; resetView.style.display="none"; setupView.style.display="none"; }
   function showReset(){ resetView.style.display="block"; formsView.style.display="none"; setupView.style.display="none"; }
   function setMsg(t,type){ const m=$("authMsg"); m.textContent=t||""; m.className="auth-msg "+(type||""); }
   function setResetMsg(t,type){ const m=$("resetMsg"); m.textContent=t||""; m.className="auth-msg "+(type||""); }
+  function setInviteMsg(t,type){ const m=$("inviteMsg"); m.textContent=t||""; m.className="auth-msg "+(type||""); }
   function trErr(m){
     if(/Invalid login/i.test(m)) return "E-posta veya şifre hatalı.";
-    if(/already registered/i.test(m)) return "Bu e-posta zaten kayıtlı.";
+    if(/already registered|already been registered/i.test(m)) return "Bu e-posta zaten kayıtlı.";
+    if(/signups not allowed|signup is disabled|forbidden/i.test(m)) return "Yeni kayıt kapalı. Lütfen yöneticiden davet isteyin.";
     if(/at least 6/i.test(m)) return "Şifre en az 6 karakter olmalı.";
     if(/Email not confirmed/i.test(m)) return "E-postanı onaylaman gerekiyor.";
     return m;
@@ -2392,24 +2505,20 @@ const SUPABASE_ANON_KEY = (window.APP_CONFIG && window.APP_CONFIG.SUPABASE_ANON_
   function renderMode(){
     setMsg("");
     const nameG=$("afName"), passG=$("afPassword"), forgotRow=$("forgotRow"), switchRow=$("switchRow");
+    nameG.style.display="none";
     if(mode==="login"){
       $("authTitle").textContent="Giriş Yap"; $("authSub").textContent="Çalışmaya devam etmek için giriş yap";
-      nameG.style.display="none"; passG.style.display="block";
+      passG.style.display="block";
       $("authSubmitBtn").textContent="Giriş Yap"; forgotRow.style.display="block";
-      switchRow.innerHTML='Hesabın yok mu? <a id="switchLink">Kayıt ol</a>';
-    } else if(mode==="signup"){
-      $("authTitle").textContent="Kayıt Ol"; $("authSub").textContent="Yeni bir hesap oluştur";
-      nameG.style.display="block"; passG.style.display="block";
-      $("authSubmitBtn").textContent="Kayıt Ol"; forgotRow.style.display="none";
-      switchRow.innerHTML='Zaten hesabın var mı? <a id="switchLink">Giriş yap</a>';
+      switchRow.textContent='Hesabın yoksa yöneticiden davet iste.';
     } else {
       $("authTitle").textContent="Şifremi Unuttum"; $("authSub").textContent="E-postana sıfırlama bağlantısı gönderelim";
-      nameG.style.display="none"; passG.style.display="none";
+      passG.style.display="none";
       $("authSubmitBtn").textContent="Bağlantı Gönder"; forgotRow.style.display="none";
       switchRow.innerHTML='<a id="switchLink">← Girişe dön</a>';
+      const sl=$("switchLink");
+      if(sl) sl.onclick=function(){ mode="login"; renderMode(); };
     }
-    const sl=$("switchLink");
-    if(sl) sl.onclick=function(){ mode=(mode==="login")?"signup":"login"; renderMode(); };
   }
 
   $("forgotLink").onclick=function(){ mode="forgot"; renderMode(); };
@@ -2430,16 +2539,8 @@ const SUPABASE_ANON_KEY = (window.APP_CONFIG && window.APP_CONFIG.SUPABASE_ANON_
         setMsg("Sıfırlama bağlantısı e-postana gönderildi. 📬","ok"); btn.disabled=false; return;
       }
       if(!password){ setMsg("Şifre gerekli.","err"); btn.disabled=false; return; }
-      if(mode==="signup"){
-        const name=$("afNameInput").value.trim();
-        const { data, error } = await sb.auth.signUp({ email, password });
-        if(error) throw error;
-        if(name && data.user){ try{ await sb.auth.updateUser({ data:{ display_name:name } }); }catch(_){} }
-        if(!data.session){ setMsg("Kaydın alındı! E-postanı onaylayıp giriş yapabilirsin.","ok"); btn.disabled=false; return; }
-      } else {
-        const { error } = await sb.auth.signInWithPassword({ email, password });
-        if(error) throw error;
-      }
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+      if(error) throw error;
     }catch(err){ setMsg(trErr(err.message),"err"); btn.disabled=false; }
   });
 
@@ -2478,8 +2579,52 @@ const SUPABASE_ANON_KEY = (window.APP_CONFIG && window.APP_CONFIG.SUPABASE_ANON_
   $("logoutBtnTB").onclick=function(){ sb.auth.signOut().then(function(){ location.reload(); }); };
   $("changePwBtnTB").onclick=function(){ openReset(false); };
   $("progressBtn").onclick=function(){ openProgress(); };
+  $("inviteBtnTB").onclick=function(){ openInviteModal(); };
   $("progressCloseBtn").onclick=function(){ $("progressModal").classList.remove("visible"); };
   $("progressModal").addEventListener("click", function(e){ if(e.target===$("progressModal")) $("progressModal").classList.remove("visible"); });
+  $("inviteCloseBtn").onclick=function(){ closeInviteModal(); };
+  $("inviteCancelBtn").onclick=function(){ closeInviteModal(); };
+  $("inviteSubmitBtn").onclick=function(){ sendInvite(); };
+  $("inviteModal").addEventListener("click", function(e){ if(e.target===$("inviteModal")) closeInviteModal(); });
+
+  function openInviteModal(){
+    if(!currentUser || !isAdminUser(currentUser.email)) return;
+    $("inviteEmailInput").value = "";
+    $("inviteNameInput").value = "";
+    setInviteMsg("");
+    $("inviteModal").classList.add("visible");
+    setTimeout(function(){ $("inviteEmailInput").focus(); }, 50);
+  }
+
+  function closeInviteModal(){
+    $("inviteModal").classList.remove("visible");
+    setInviteMsg("");
+    $("inviteSubmitBtn").disabled = false;
+  }
+
+  async function sendInvite(){
+    if(!currentUser || !isAdminUser(currentUser.email)){
+      setInviteMsg("Bu işlem için admin yetkisi gerekli.", "err");
+      return;
+    }
+    const email = normalizeEmail($("inviteEmailInput").value);
+    const fullName = String($("inviteNameInput").value || "").trim();
+    if(!email){ setInviteMsg("E-posta gerekli.", "err"); return; }
+
+    $("inviteSubmitBtn").disabled = true;
+    setInviteMsg("Davet gönderiliyor…", "");
+    try{
+      const payload = { email: email, fullName: fullName };
+      const res = await sb.functions.invoke(INVITE_FUNCTION_NAME, { body: payload });
+      if(res.error) throw res.error;
+      setInviteMsg("Davet gönderildi ✓", "ok");
+      Toast.show("Davet e-postası gönderildi", "success");
+      setTimeout(function(){ closeInviteModal(); }, 700);
+    }catch(err){
+      setInviteMsg(trErr((err && err.message) || "Davet gönderilemedi."), "err");
+      $("inviteSubmitBtn").disabled = false;
+    }
+  }
 
   /* ---------- Cevap kaydı (uygulamadan çağrılır) ---------- */
   window.__progressRecord = function(groupName, isCorrect){
@@ -2586,6 +2731,7 @@ const SUPABASE_ANON_KEY = (window.APP_CONFIG && window.APP_CONFIG.SUPABASE_ANON_
     overlay.style.display="none";
     const displayName=(user.user_metadata&&user.user_metadata.display_name)||(user.email?user.email.split("@")[0]:"Öğrenci");
     $("tbUserName").textContent="👋 "+displayName;
+    syncAdminVisibility(user);
     $("authControls").style.display="flex";
     if(!started){
       started=true;
@@ -2603,6 +2749,7 @@ const SUPABASE_ANON_KEY = (window.APP_CONFIG && window.APP_CONFIG.SUPABASE_ANON_
     if(event==="SIGNED_OUT" || !session){
       currentUser=null; started=false;
       $("authControls").style.display="none";
+      syncAdminVisibility(null);
       overlay.style.display="flex"; mode="login"; renderMode(); showForms();
       return;
     }
