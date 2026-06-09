@@ -1,0 +1,2126 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Selçuk Cantürk</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --lego-red:    #03070b65;
+    --lego-yellow: #F5D400;
+    --lego-blue:   #006CB7;
+    --lego-green:  #00A650;
+    --lego-orange: #FF6600;
+    --lego-black:  #1A1A1A;
+    --lego-white:  #FFFFFF;
+    --lego-gray:   #F0F0F0;
+    --lego-gray2:  #D6D6D6;
+    --lego-dark-gray: #555555;
+
+    --primary:       var(--lego-blue);
+    --primary-light: #D6EEFF;
+    --primary-dark:  #004A80;
+    --success:       var(--lego-green);
+    --success-light: #CCFFE6;
+    --error:         var(--lego-red);
+    --error-light:   #FFD6D6;
+    --warning:       var(--lego-orange);
+
+    --surface:          #FFFFFF;
+    --surface-variant:  #F5F5F5;
+    --on-surface:       var(--lego-black);
+    --on-surface-variant: #555555;
+    --outline-variant:  #CCCCCC;
+
+    /* LEGO brick shadow: hard offset black */
+    --brick-shadow: 4px 4px 0px var(--lego-black);
+    --brick-shadow-lg: 6px 6px 0px var(--lego-black);
+    --brick-shadow-xl: 8px 8px 0px var(--lego-black);
+
+    --shadow-1: 0 2px 0 var(--lego-black);
+    --shadow-2: 0 4px 0 var(--lego-black);
+    --shadow-3: var(--brick-shadow);
+    --shadow-4: var(--brick-shadow-xl);
+
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-xl: 18px;
+
+    --border: 3px solid var(--lego-black);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+
+  body {
+    font-family: 'Fredoka', sans-serif;
+    background-color: var(--lego-yellow);
+    background-image:
+      radial-gradient(circle, rgba(0,0,0,0.12) 2px, transparent 2px);
+    background-size: 28px 28px;
+    color: var(--on-surface);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4 { font-family: 'Fredoka', sans-serif; font-weight: 700; }
+
+  /* ÜST BAR — LEGO Logo kırmızı */
+  .top-bar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 80px;
+    background: var(--lego-red);
+    border-bottom: 4px solid var(--lego-black);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    z-index: 100;
+  }
+  .top-bar-title {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--lego-white);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    text-shadow: 2px 2px 0 var(--lego-black);
+    letter-spacing: 0.5px;
+  }
+  .top-bar-title .icon { font-size: 28px; }
+  .top-bar-actions { display: flex; gap: 8px; align-items: center; }
+
+  .stats { display: flex; gap: 8px; margin-right: 8px; font-size: 15px; font-weight: 700; }
+  .stat-item {
+    display: flex; align-items: center; gap: 6px;
+    padding: 6px 14px;
+    background: var(--lego-yellow);
+    border: 3px solid var(--lego-black);
+    border-radius: var(--radius-sm);
+    color: var(--lego-black);
+    box-shadow: 3px 3px 0 var(--lego-black);
+  }
+  .stat-item.correct { background: var(--lego-green); color: white; }
+  .stat-item.wrong   { background: var(--lego-red);   color: white; border-color: #800008; box-shadow: 3px 3px 0 #800008; }
+
+  /* BUTONLAR */
+  .btn {
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 700;
+    border: var(--border);
+    cursor: pointer;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    user-select: none;
+    letter-spacing: 0.3px;
+  }
+  .btn:focus-visible { outline: 3px solid var(--lego-yellow); outline-offset: 2px; }
+
+  .btn-icon {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.18);
+    color: white;
+    font-size: 22px;
+    border: 2px solid rgba(255,255,255,0.4);
+  }
+  .btn-icon:hover { background: rgba(255,255,255,0.30); transform: scale(1.05); }
+
+  /* LEGO brick button style: flat top, drop shadow = thickness */
+  .btn-primary {
+    background: var(--lego-blue);
+    color: white;
+    padding: 12px 28px;
+    border-radius: var(--radius-md);
+    font-size: 17px;
+    box-shadow: 0 5px 0 #003F6B;
+    text-shadow: 1px 1px 0 #003F6B;
+  }
+  .btn-primary:hover  { transform: translateY(-2px); box-shadow: 0 7px 0 #003F6B; }
+  .btn-primary:active { transform: translateY(3px);  box-shadow: 0 2px 0 #003F6B; }
+
+  .btn-secondary {
+    background: var(--lego-gray);
+    color: var(--lego-black);
+    padding: 12px 24px;
+    border-radius: var(--radius-md);
+    font-size: 16px;
+    box-shadow: 0 5px 0 #999;
+  }
+  .btn-secondary:hover  { transform: translateY(-2px); box-shadow: 0 7px 0 #999; }
+  .btn-secondary:active { transform: translateY(3px);  box-shadow: 0 2px 0 #999; }
+
+  .btn-danger {
+    background: var(--lego-red);
+    color: white;
+    padding: 10px 20px;
+    border-radius: var(--radius-md);
+    font-size: 15px;
+    box-shadow: 0 5px 0 #800008;
+    text-shadow: 1px 1px 0 #800008;
+  }
+  .btn-danger:hover  { transform: translateY(-2px); box-shadow: 0 7px 0 #800008; }
+  .btn-danger:active { transform: translateY(3px);  box-shadow: 0 2px 0 #800008; }
+
+  .btn-success {
+    background: var(--lego-green);
+    color: white;
+    padding: 12px 28px;
+    border-radius: var(--radius-md);
+    font-size: 17px;
+    box-shadow: 0 5px 0 #005C2B;
+    text-shadow: 1px 1px 0 #005C2B;
+  }
+  .btn-success:hover  { transform: translateY(-2px); box-shadow: 0 7px 0 #005C2B; }
+  .btn-success:active { transform: translateY(3px);  box-shadow: 0 2px 0 #005C2B; }
+
+  /* ANA İÇERİK */
+  .main-content {
+    margin-top: 68px;
+    padding: 36px 24px;
+    min-height: calc(100vh - 68px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .content-wrapper { max-width: 940px; width: 100%; }
+
+  /* GRUP SEÇİM EKRANI */
+  .groups-screen { animation: brickDrop 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+
+  @keyframes brickDrop {
+    from { opacity: 0; transform: translateY(-24px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .groups-header {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+  /* LEGO-style logo badge for the title */
+  .groups-header h1 {
+    display: inline-block;
+    font-size: 38px;
+    font-weight: 700;
+    color: var(--lego-black);
+    background: var(--lego-yellow);
+    border: var(--border);
+    border-radius: var(--radius-md);
+    padding: 10px 28px;
+    box-shadow: var(--brick-shadow-lg);
+    margin-bottom: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .groups-header p {
+    color: var(--lego-black);
+    font-size: 18px;
+    font-weight: 600;
+    background: white;
+    display: inline-block;
+    padding: 6px 20px;
+    border: 3px solid var(--lego-black);
+    border-radius: 999px;
+    box-shadow: 3px 3px 0 var(--lego-black);
+  }
+
+  .groups-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 24px;
+  }
+
+  /* LEGO brick card */
+  .group-card {
+    background: var(--surface);
+    border: var(--border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--brick-shadow-lg);
+    padding: 0 0 24px 0;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  /* Colored top strip with studs */
+  .group-card::before {
+    content: '⬤  ⬤';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 52px;
+    background: var(--group-color, var(--lego-blue));
+    border-bottom: 3px solid var(--lego-black);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: rgba(255,255,255,0.55);
+    letter-spacing: 16px;
+    padding-left: 16px;
+  }
+  .group-card:hover {
+    transform: translate(-3px, -4px);
+    box-shadow: 9px 10px 0px var(--lego-black);
+  }
+  .group-card:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px var(--lego-black);
+  }
+  .group-card .emoji {
+    font-size: 52px;
+    margin: 64px 0 12px;
+    display: block;
+    filter: drop-shadow(2px 2px 0 rgba(0,0,0,0.2));
+  }
+  .group-card .group-name {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--on-surface);
+    margin-bottom: 8px;
+    letter-spacing: 0.3px;
+  }
+  .group-card .question-count {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--lego-black);
+    background: var(--lego-yellow);
+    border: 2px solid var(--lego-black);
+    padding: 4px 14px;
+    border-radius: 999px;
+    display: inline-block;
+    box-shadow: 2px 2px 0 var(--lego-black);
+  }
+  .group-card.empty { opacity: 0.5; cursor: not-allowed; }
+  .group-card.empty:hover { transform: none; box-shadow: var(--brick-shadow-lg); }
+
+  /* SORU EKRANI */
+  .question-screen { display: flex; align-items: center; justify-content: center; }
+  .question-card {
+    background: var(--surface);
+    border: var(--border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--brick-shadow-xl);
+    padding: 40px;
+    max-width: 740px;
+    width: 100%;
+    animation: brickDrop 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  @keyframes cardEnter {
+    from { opacity: 0; transform: translateY(20px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .group-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    border: 2px solid var(--lego-black);
+    background: var(--lego-yellow);
+    color: var(--lego-black);
+    margin-bottom: 16px;
+    box-shadow: 2px 2px 0 var(--lego-black);
+  }
+
+  .question-image-wrapper {
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto 24px;
+    border: var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--lego-gray);
+    box-shadow: var(--brick-shadow);
+  }
+  .question-image-wrapper img {
+    width: 100%; height: auto;
+    display: block;
+    max-height: 240px;
+    object-fit: contain;
+  }
+
+  .question-text {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 46px;
+    font-weight: 700;
+    text-align: center;
+    color: var(--lego-black);
+    margin: 20px 0 32px;
+    letter-spacing: 1px;
+    word-break: break-word;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+  }
+
+  /* Progress bar for session */
+  .session-progress {
+    margin-bottom: 20px;
+  }
+  .session-progress-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--lego-dark-gray);
+    margin-bottom: 6px;
+    text-align: right;
+  }
+  .session-progress-track {
+    height: 14px;
+    background: var(--lego-gray2);
+    border: 2px solid var(--lego-black);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .session-progress-fill {
+    height: 100%;
+    background: var(--lego-blue);
+    border-radius: 999px;
+    transition: width 0.4s ease;
+  }
+
+  .options-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  /* LEGO answer brick buttons */
+  .option-btn {
+    background: var(--lego-gray);
+    border: var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 34px;
+    font-weight: 700;
+    color: var(--lego-black);
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+    min-height: 90px;
+    box-shadow: 0 5px 0 var(--lego-black);
+    position: relative;
+  }
+  .option-btn:hover:not(:disabled) {
+    background: var(--lego-yellow);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 0 var(--lego-black);
+  }
+  .option-btn:active:not(:disabled) {
+    transform: translateY(3px);
+    box-shadow: 0 2px 0 var(--lego-black);
+  }
+  .option-btn.correct {
+    background: var(--lego-green);
+    border-color: #005C2B;
+    color: white;
+    box-shadow: 0 5px 0 #005C2B;
+    animation: brickBounce 0.4s;
+  }
+  .option-btn.wrong {
+    background: var(--lego-red);
+    border-color: #800008;
+    color: white;
+    box-shadow: 0 5px 0 #800008;
+    animation: shake 0.4s;
+  }
+  .option-btn:disabled { cursor: not-allowed; }
+
+  @keyframes brickBounce {
+    0%   { transform: translateY(0); }
+    30%  { transform: translateY(-8px); }
+    60%  { transform: translateY(2px); }
+    100% { transform: translateY(0); }
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25%  { transform: translateX(-8px); }
+    75%  { transform: translateX(8px); }
+  }
+
+  .feedback-message {
+    margin-top: 20px;
+    padding: 14px 20px;
+    border: var(--border);
+    border-radius: var(--radius-md);
+    text-align: center;
+    font-weight: 700;
+    font-size: 18px;
+    display: none;
+    animation: brickDrop 0.25s;
+    box-shadow: var(--brick-shadow);
+  }
+  .feedback-message.success { background: var(--success-light); color: #005C2B; display: block; }
+  .feedback-message.error   { background: var(--error-light);   color: #800008; display: block; }
+
+  .next-btn-wrapper { margin-top: 24px; text-align: center; display: none; }
+  .next-btn-wrapper.visible { display: block; }
+
+  .back-btn {
+    margin-bottom: 20px;
+    background: var(--lego-yellow);
+    color: var(--lego-black);
+    padding: 8px 18px;
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    font-size: 15px;
+    border: var(--border);
+    box-shadow: 0 4px 0 var(--lego-black);
+  }
+  .back-btn:hover  { transform: translateY(-2px); box-shadow: 0 6px 0 var(--lego-black); }
+  .back-btn:active { transform: translateY(2px);  box-shadow: 0 2px 0 var(--lego-black); }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: var(--surface);
+    border: var(--border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--brick-shadow-xl);
+  }
+  .empty-state .emoji { font-size: 80px; margin-bottom: 16px; }
+  .empty-state h2 { font-size: 28px; color: var(--lego-black); margin-bottom: 12px; }
+  .empty-state p  { font-size: 16px; color: var(--on-surface-variant); margin-bottom: 24px; }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+    animation: fadeIn 0.2s;
+  }
+  .modal-overlay.visible { display: flex; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .modal {
+    background: var(--surface);
+    border: var(--border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--brick-shadow-xl);
+    width: 100%;
+    max-width: 720px;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    animation: brickDrop 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .modal-header {
+    padding: 20px 28px;
+    border-bottom: 3px solid var(--lego-black);
+    background: var(--lego-blue);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .modal-header h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-shadow: 1px 1px 0 #003F6B;
+  }
+  .modal-body { padding: 24px 28px; overflow-y: auto; flex: 1; }
+
+  /* PIN */
+  .pin-prompt { padding: 40px 28px; text-align: center; }
+  .pin-prompt h2 { font-size: 24px; color: var(--lego-black); margin-bottom: 8px; }
+  .pin-prompt p  { color: var(--on-surface-variant); margin-bottom: 24px; font-size: 14px; }
+  .pin-input {
+    width: 200px;
+    padding: 16px;
+    font-size: 32px;
+    text-align: center;
+    border: var(--border);
+    border-radius: var(--radius-md);
+    font-family: 'Fredoka', sans-serif;
+    letter-spacing: 8px;
+    margin-bottom: 16px;
+    background: var(--lego-gray);
+    box-shadow: inset 0 2px 0 var(--lego-black);
+  }
+  .pin-input:focus { outline: 3px solid var(--lego-yellow); }
+  .pin-error { color: var(--lego-red); font-size: 14px; font-weight: 700; margin-bottom: 16px; min-height: 20px; }
+
+  /* FORM */
+  .form-group { margin-bottom: 20px; }
+  .form-group label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--on-surface);
+    font-size: 14px;
+  }
+  .form-group .hint {
+    font-size: 12px;
+    color: var(--on-surface-variant);
+    font-weight: 600;
+    margin-top: 4px;
+  }
+  .form-input, .form-textarea, .form-select {
+    width: 100%;
+    padding: 12px 16px;
+    border: var(--border);
+    border-radius: var(--radius-md);
+    font-family: 'Fredoka', sans-serif;
+    font-size: 16px;
+    background: var(--lego-gray);
+    transition: border-color 0.2s;
+    box-shadow: inset 0 2px 0 rgba(0,0,0,0.08);
+  }
+  .form-input:focus, .form-textarea:focus, .form-select:focus {
+    outline: 3px solid var(--lego-yellow);
+    border-color: var(--lego-black);
+  }
+  .form-textarea { resize: vertical; min-height: 60px; }
+
+  .options-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .option-input-wrapper { display: flex; align-items: center; gap: 8px; }
+  .option-input-wrapper input[type="radio"] {
+    width: 20px; height: 20px;
+    accent-color: var(--lego-blue);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .option-input-wrapper .form-input { flex: 1; }
+
+  .image-upload-wrapper {
+    border: 3px dashed var(--lego-black);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--lego-gray);
+  }
+  .image-upload-wrapper:hover { border-color: var(--lego-blue); background: var(--primary-light); }
+  .image-upload-wrapper input[type="file"] { display: none; }
+  .image-preview {
+    max-width: 200px;
+    max-height: 150px;
+    margin: 12px auto 0;
+    border-radius: var(--radius-sm);
+    border: var(--border);
+    display: block;
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 3px solid var(--lego-black);
+    margin-bottom: 24px;
+    overflow-x: auto;
+  }
+  .tab {
+    padding: 10px 18px;
+    background: var(--lego-gray);
+    border: 2px solid var(--lego-black);
+    border-bottom: none;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--on-surface-variant);
+    cursor: pointer;
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    transition: background 0.15s;
+    white-space: nowrap;
+  }
+  .tab:hover { background: var(--lego-yellow); color: var(--lego-black); }
+  .tab.active { background: var(--lego-blue); color: white; border-color: var(--lego-blue); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* LISTELER */
+  .item-list { display: flex; flex-direction: column; gap: 10px; }
+  .list-item {
+    background: var(--lego-gray);
+    border: 2px solid var(--lego-black);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    box-shadow: 2px 2px 0 var(--lego-black);
+  }
+  .list-item .thumb {
+    width: 48px; height: 48px;
+    border-radius: var(--radius-sm);
+    border: 2px solid var(--lego-black);
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  .list-item .thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .list-item .info { flex: 1; min-width: 0; }
+  .list-item .item-title {
+    font-weight: 700;
+    color: var(--on-surface);
+    font-size: 15px;
+    margin-bottom: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .list-item .item-subtitle { font-size: 13px; color: var(--on-surface-variant); font-weight: 600; }
+  .list-item .actions { display: flex; gap: 4px; }
+
+  .icon-action-btn {
+    width: 36px; height: 36px;
+    border-radius: var(--radius-sm);
+    background: white;
+    border: 2px solid var(--lego-black);
+    cursor: pointer;
+    font-size: 17px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, transform 0.1s;
+    box-shadow: 2px 2px 0 var(--lego-black);
+  }
+  .icon-action-btn:hover { background: var(--lego-yellow); transform: translate(-1px,-1px); }
+  .icon-action-btn.delete:hover { background: var(--error-light); }
+
+  .filter-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .filter-bar label {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--on-surface-variant);
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--lego-black);
+    color: white;
+    padding: 14px 28px;
+    border: 3px solid var(--lego-black);
+    border-radius: var(--radius-md);
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    box-shadow: var(--brick-shadow);
+    z-index: 2000;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    max-width: 90%;
+  }
+  .toast.visible { transform: translateX(-50%) translateY(0); }
+  .toast.success { background: var(--lego-green); border-color: #005C2B; }
+  .toast.error   { background: var(--lego-red);   border-color: #800008; }
+
+  /* RENK + EMOJI SEÇİCİ */
+  .color-picker { display: flex; gap: 8px; flex-wrap: wrap; }
+  .color-swatch {
+    width: 36px; height: 36px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    border: 3px solid transparent;
+    transition: all 0.15s;
+    box-shadow: 2px 2px 0 var(--lego-black);
+  }
+  .color-swatch:hover  { transform: translate(-1px, -2px); box-shadow: 3px 4px 0 var(--lego-black); }
+  .color-swatch.selected { border-color: var(--lego-black); transform: translate(-1px,-2px); }
+
+  .emoji-picker-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 6px;
+    max-height: 180px;
+    overflow-y: auto;
+    padding: 8px;
+    background: var(--lego-gray);
+    border: 2px solid var(--lego-black);
+    border-radius: var(--radius-md);
+  }
+  .emoji-swatch {
+    background: white;
+    border: 2px solid transparent;
+    border-radius: var(--radius-sm);
+    padding: 5px;
+    cursor: pointer;
+    font-size: 22px;
+    transition: all 0.12s;
+  }
+  .emoji-swatch:hover { background: var(--lego-yellow); border-color: var(--lego-black); }
+  .emoji-swatch.selected { border-color: var(--lego-black); background: var(--lego-yellow); }
+
+  /* MOBİL */
+  @media (max-width: 640px) {
+    .top-bar { padding: 0 12px; height: 60px; }
+    .top-bar-title { font-size: 15px; }
+    .top-bar-title .icon { font-size: 22px; }
+    .stats { gap: 6px; margin-right: 4px; }
+    .stat-item { padding: 4px 8px; font-size: 12px; }
+    .main-content { padding: 16px 12px; margin-top: 60px; }
+    .question-card { padding: 20px 16px; }
+    .question-text { font-size: 34px; margin: 14px 0 22px; }
+    .option-btn { padding: 16px; font-size: 28px; min-height: 76px; }
+    .modal { max-height: 95vh; }
+    .modal-header, .modal-body { padding-left: 16px; padding-right: 16px; }
+    .options-form-grid { grid-template-columns: 1fr; }
+    .groups-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px; }
+    .group-card .emoji { font-size: 44px; }
+    .group-card .group-name { font-size: 18px; }
+    .groups-header h1 { font-size: 26px; padding: 8px 18px; }
+    .emoji-picker-grid { grid-template-columns: repeat(6, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<header class="top-bar">
+  <div class="top-bar-title" id="topBarTitle">
+    <span class="icon"><img style="height: 50px;" src="https://www.iku.edu.tr/sites/default/files/favicon.png" alt="Icon"></span>
+    <span>Selçuk Cantürk Özel Eğitimde Matematik Öğretimi İKÜ</span>
+  </div>
+  <div class="top-bar-actions">
+    <div class="stats">
+      <div class="stat-item correct">✓ <span id="correctCount">0</span></div>
+      <div class="stat-item wrong">✗ <span id="wrongCount">0</span></div>
+    </div>
+    <button class="btn btn-icon" id="soundToggleBtn" aria-label="Ses" title="Sesi aç/kapat">🔊</button>
+    <button class="btn btn-icon" id="settingsBtn" aria-label="Ayarlar" title="Ayarlar">⚙️</button>
+  </div>
+</header>
+
+<main class="main-content">
+  <div class="content-wrapper" id="contentWrapper"></div>
+</main>
+
+<!-- PIN MODAL -->
+<div class="modal-overlay" id="pinModal">
+  <div class="modal" style="max-width: 400px;">
+    <div class="pin-prompt">
+      <h2>🔐 Yönetici Girişi</h2>
+      <p>Lütfen yönetici şifresini giriniz</p>
+      <input type="password" class="pin-input" id="pinInput" maxlength="4" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
+      <div class="pin-error" id="pinError"></div>
+      <div style="display: flex; gap: 12px; justify-content: center;">
+        <button class="btn btn-secondary" id="pinCancelBtn">İptal</button>
+        <button class="btn btn-primary" id="pinSubmitBtn">Giriş</button>
+      </div>
+      <p style="margin-top: 16px; font-size: 12px;">Varsayılan şifre: <strong>1234</strong></p>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN MODAL -->
+<div class="modal-overlay" id="adminModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>⚙️ Yönetim Paneli</h2>
+      <button class="btn btn-icon" id="adminCloseBtn" aria-label="Kapat">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="tabs">
+        <button class="tab active" data-tab="groups">📁 Gruplar (<span id="groupCountBadge">0</span>)</button>
+        <button class="tab" data-tab="add">➕ Soru Ekle</button>
+        <button class="tab" data-tab="list">📋 Sorular (<span id="questionCountBadge">0</span>)</button>
+        <button class="tab" data-tab="data">💾 Veri</button>
+        <button class="tab" data-tab="settings">🔧 Ayarlar</button>
+      </div>
+
+      <!-- GRUPLAR -->
+      <div class="tab-content active" id="tab-groups">
+        <form id="groupForm" style="background: var(--surface-variant); padding: 16px; border-radius: var(--radius-md); margin-bottom: 24px;">
+          <input type="hidden" id="groupEditId">
+          <div class="form-group" style="margin-bottom: 12px;">
+            <label for="groupName">Grup Adı</label>
+            <input type="text" class="form-input" id="groupName" placeholder="Örnek: Toplama" required maxlength="40">
+          </div>
+          <div class="form-group" style="margin-bottom: 12px;">
+            <label>Simge (Emoji)</label>
+            <div class="emoji-picker-grid" id="emojiPicker"></div>
+          </div>
+          <div class="form-group" style="margin-bottom: 12px;">
+            <label>Renk</label>
+            <div class="color-picker" id="colorPicker"></div>
+          </div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button type="submit" class="btn btn-primary" id="saveGroupBtn">💾 Grubu Kaydet</button>
+            <button type="button" class="btn btn-secondary" id="resetGroupFormBtn">Temizle</button>
+          </div>
+        </form>
+        <h3 style="margin-bottom: 12px; font-size: 16px; color: var(--on-surface-variant);">Mevcut Gruplar</h3>
+        <div id="groupsList" class="item-list"></div>
+      </div>
+
+      <!-- SORU EKLE -->
+      <div class="tab-content" id="tab-add">
+        <form id="questionForm">
+          <input type="hidden" id="editId">
+          <div class="form-group">
+            <label for="questionGroup">Grup</label>
+            <select class="form-select" id="questionGroup" required></select>
+            <div class="hint">Bu sorunun hangi gruba ait olduğunu seçin.</div>
+          </div>
+          <div class="form-group">
+            <label for="questionText">Soru Metni</label>
+            <textarea class="form-textarea" id="questionText" placeholder="Örnek: 5 + 3 = ?" required></textarea>
+          </div>
+          <div class="form-group">
+            <label>Resim (İsteğe Bağlı)</label>
+            <label class="image-upload-wrapper" for="imageInput">
+              <input type="file" id="imageInput" accept="image/*">
+              <div id="imageUploadText">📷 Resim seçmek için tıklayın</div>
+              <img id="imagePreview" class="image-preview" style="display:none;" alt="">
+            </label>
+            <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px;">
+              <input type="url" class="form-input" id="imageUrlInput" placeholder="veya buraya resim URL'si yapıştırın..." style="flex: 1;">
+              <button type="button" class="btn btn-secondary" id="imageUrlBtn" style="padding: 10px 16px; font-size: 13px; white-space: nowrap;">🔗 Uygula</button>
+            </div>
+            <button type="button" class="btn btn-secondary" id="removeImageBtn" style="margin-top: 8px; padding: 6px 14px; font-size: 13px; display: none;">Resmi Kaldır</button>
+          </div>
+          <div class="form-group">
+            <label>Cevap Şıkları</label>
+            <div class="hint" style="margin-bottom: 8px;">Doğru cevabın yanındaki yuvarlağı işaretleyin.</div>
+            <div class="options-form-grid">
+              <div class="option-input-wrapper">
+                <input type="radio" name="correctOption" value="0" id="correct0" required>
+                <input type="text" class="form-input" id="option0" placeholder="A şıkkı" required>
+              </div>
+              <div class="option-input-wrapper">
+                <input type="radio" name="correctOption" value="1" id="correct1">
+                <input type="text" class="form-input" id="option1" placeholder="B şıkkı" required>
+              </div>
+              <div class="option-input-wrapper">
+                <input type="radio" name="correctOption" value="2" id="correct2">
+                <input type="text" class="form-input" id="option2" placeholder="C şıkkı" required>
+              </div>
+              <div class="option-input-wrapper">
+                <input type="radio" name="correctOption" value="3" id="correct3">
+                <input type="text" class="form-input" id="option3" placeholder="D şıkkı" required>
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <button type="submit" class="btn btn-primary" id="saveQuestionBtn">💾 Soruyu Kaydet</button>
+            <button type="button" class="btn btn-secondary" id="resetFormBtn">Temizle</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- SORU LİSTESİ -->
+      <div class="tab-content" id="tab-list">
+        <div class="filter-bar">
+          <label for="filterGroup">Grup:</label>
+          <select class="form-select" id="filterGroup" style="width: auto; flex: 1; max-width: 280px;"></select>
+        </div>
+        <div id="questionsList" class="item-list"></div>
+      </div>
+
+      <!-- VERİ -->
+      <div class="tab-content" id="tab-data">
+        <p style="margin-bottom: 16px; color: var(--on-surface-variant);">
+          Tüm verilerinizi (gruplar + sorular) yedekleyin veya başka cihazdan yükleyin.
+        </p>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <button class="btn btn-primary" id="exportBtn">📤 Verileri Dışa Aktar (JSON)</button>
+          <label class="btn btn-secondary" for="importInput" style="display: inline-flex;">
+            📥 Verileri İçe Aktar (JSON)
+          </label>
+          <input type="file" id="importInput" accept=".json,application/json" style="display: none;">
+          <div style="margin-top: 12px; padding: 16px; background: var(--surface-variant); border-radius: var(--radius-md);">
+            <strong>İçe aktarma seçenekleri:</strong>
+            <div style="margin-top: 8px;">
+              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 400;">
+                <input type="radio" name="importMode" value="replace" checked>
+                <span>Mevcut verileri sil ve yenilerini ekle</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 400; margin-top: 6px;">
+                <input type="radio" name="importMode" value="merge">
+                <span>Mevcut verilerin üzerine ekle</span>
+              </label>
+            </div>
+          </div>
+          <button class="btn btn-danger" id="clearAllBtn" style="margin-top: 12px;">🗑️ Tüm Verileri Sil</button>
+        </div>
+      </div>
+
+      <!-- AYARLAR -->
+      <div class="tab-content" id="tab-settings">
+        <div class="form-group">
+          <label for="pinInputSetting">Yönetici Şifresi (4 haneli)</label>
+          <input type="text" class="form-input" id="pinInputSetting" maxlength="4" inputmode="numeric" pattern="[0-9]{4}">
+          <div class="hint">Sadece rakam, 4 hane.</div>
+        </div>
+        <button class="btn btn-primary" id="savePinBtn">Şifreyi Kaydet</button>
+        <hr style="margin: 24px 0; border: none; border-top: 1px solid var(--outline-variant);">
+        <div style="background: var(--surface-variant); padding: 16px; border-radius: var(--radius-md); font-size: 14px; color: var(--on-surface-variant);">
+          <strong>Bilgi:</strong>
+          <ul style="margin: 8px 0 0 20px; line-height: 1.6;">
+            <li>Veriler tarayıcının LocalStorage'ında saklanır</li>
+            <li>Tarayıcı verileri silinirse her şey kaybolur</li>
+            <li>Yedekleme için "Dışa Aktar" özelliğini kullanın</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function() {
+  'use strict';
+
+  const STORAGE_KEYS = {
+    QUESTIONS: 'matematik_sorulari',
+    GROUPS: 'matematik_gruplari',
+    PIN: 'matematik_pin',
+    ASKED: 'matematik_sorulan_idler',
+    SOUND: 'matematik_ses_acik'
+  };
+  const DEFAULT_PIN = '1234';
+  const SESSION_LIMIT = 10;
+
+  const COLOR_PALETTE = [
+    '#F44336', '#E91E63', '#9C27B0', '#673AB7',
+    '#3F51B5', '#2196F3', '#03A9F4', '#00BCD4',
+    '#009688', '#4CAF50', '#8BC34A', '#FFC107',
+    '#FF9800', '#FF5722', '#795548', '#607D8B'
+  ];
+
+  const EMOJI_PALETTE = [
+    '➕','➖','✖️','➗','🧮','🔢','📐','📏',
+    '🎯','⭐','🌟','💎','🎨','🎲','🎪','🎭',
+    '🐶','🐱','🐰','🦁','🐯','🐸','🦋','🌸',
+    '🍎','🍊','🍌','🍇','🍓','🥕','🌳','🌈'
+  ];
+
+  const state = {
+    questions: [],
+    groups: [],
+    askedIds: {},
+    currentGroupId: null,
+    currentQuestion: null,
+    currentImageData: null,
+    isAnswered: false,
+    correctCount: 0,
+    wrongCount: 0,
+    sessionQuestionsAnswered: 0,
+    soundEnabled: true,
+    selectedColor: COLOR_PALETTE[3],
+    selectedEmoji: EMOJI_PALETTE[0]
+  };
+
+  const Util = {
+    generateId(prefix) {
+      return prefix + '_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+    },
+    escapeHtml(str) {
+      if (str == null) return '';
+      const div = document.createElement('div');
+      div.textContent = String(str);
+      return div.innerHTML;
+    }
+  };
+
+  const Storage = {
+    _load(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+      } catch (e) {
+        console.error('Yükleme hatası:', key, e);
+        return fallback;
+      }
+    },
+    _save(key, value) {
+      try {
+        localStorage.setItem(key, JSON.stringify(value));
+        return true;
+      } catch (e) {
+        console.error('Kayıt hatası:', key, e);
+        Toast.show('Kayıt başarısız! Depolama dolu olabilir.', 'error');
+        return false;
+      }
+    },
+    loadQuestions() { return this._load(STORAGE_KEYS.QUESTIONS, []); },
+    saveQuestions(q) { return this._save(STORAGE_KEYS.QUESTIONS, q); },
+    loadGroups() { return this._load(STORAGE_KEYS.GROUPS, []); },
+    saveGroups(g) { return this._save(STORAGE_KEYS.GROUPS, g); },
+    loadAsked() { return this._load(STORAGE_KEYS.ASKED, {}); },
+    saveAsked(a) { return this._save(STORAGE_KEYS.ASKED, a); },
+    loadPin() { return localStorage.getItem(STORAGE_KEYS.PIN) || DEFAULT_PIN; },
+    savePin(pin) { localStorage.setItem(STORAGE_KEYS.PIN, pin); },
+    loadSound() {
+      const val = localStorage.getItem(STORAGE_KEYS.SOUND);
+      return val === null ? true : val === 'true';
+    },
+    saveSound(enabled) {
+      localStorage.setItem(STORAGE_KEYS.SOUND, enabled ? 'true' : 'false');
+    }
+  };
+
+  // Migration: eski sürümden gelenleri yeni yapıya uyarla
+  function migrate() {
+    let groups = Storage.loadGroups();
+    const questions = Storage.loadQuestions();
+
+    // Hiç grup yoksa varsayılanları oluştur
+    if (groups.length === 0) {
+      groups = [
+        { id: 'grp_toplama', name: 'Toplama', emoji: '➕', color: '#4CAF50', createdAt: Date.now() },
+        { id: 'grp_cikarma', name: 'Çıkarma', emoji: '➖', color: '#FF9800', createdAt: Date.now() + 1 },
+        { id: 'grp_carpma', name: 'Çarpma', emoji: '✖️', color: '#2196F3', createdAt: Date.now() + 2 },
+        { id: 'grp_bolme', name: 'Bölme', emoji: '➗', color: '#9C27B0', createdAt: Date.now() + 3 }
+      ];
+      Storage.saveGroups(groups);
+    }
+
+    // Eski formattaki gruba bağlı olmayan soruları ilk gruba ata
+    let needsResave = false;
+    questions.forEach(q => {
+      if (!q.groupId) {
+        q.groupId = groups[0].id;
+        needsResave = true;
+      }
+    });
+    if (needsResave) Storage.saveQuestions(questions);
+  }
+
+  const Toast = {
+    el: null,
+    timeout: null,
+    init() { this.el = document.getElementById('toast'); },
+    show(message, type) {
+      this.el.textContent = message;
+      this.el.className = 'toast visible' + (type ? ' ' + type : '');
+      clearTimeout(this.timeout);
+      this.timeout = setTimeout(() => { this.el.className = 'toast'; }, 2800);
+    }
+  };
+
+  const Sound = {
+    ctx: null,
+    ensureContext() {
+      if (!this.ctx) {
+        try {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (!AC) return false;
+          this.ctx = new AC();
+        } catch (e) { return false; }
+      }
+      if (this.ctx.state === 'suspended') this.ctx.resume().catch(() => {});
+      return true;
+    },
+    playNote(freq, startTime, duration, volume, type) {
+      const safeDuration = Math.max(0.04, duration || 0.04);
+      const attack = Math.min(0.01, safeDuration * 0.35);
+      const holdEnd = startTime + Math.max(attack + 0.005, safeDuration - 0.015);
+      const endTime = startTime + safeDuration;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = type || 'sine';
+      osc.frequency.setValueAtTime(freq, startTime);
+      gain.gain.setValueAtTime(0, startTime);
+      gain.gain.linearRampToValueAtTime(volume, startTime + attack);
+      gain.gain.setValueAtTime(volume, holdEnd);
+      gain.gain.linearRampToValueAtTime(0, endTime);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(startTime);
+      osc.stop(endTime);
+    },
+    playSweep(startFreq, endFreq, startTime, duration, volume, type) {
+      const safeDuration = Math.max(0.04, duration || 0.04);
+      const endTime = startTime + safeDuration;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = type || 'square';
+      osc.frequency.setValueAtTime(startFreq, startTime);
+      osc.frequency.exponentialRampToValueAtTime(Math.max(1, endFreq), endTime);
+      gain.gain.setValueAtTime(0, startTime);
+      gain.gain.linearRampToValueAtTime(volume, startTime + 0.006);
+      gain.gain.exponentialRampToValueAtTime(0.0001, endTime);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(startTime);
+      osc.stop(endTime);
+    },
+    playBrickClick(startTime, pitch, volume) {
+      // Short, plastic-like click for a LEGO brick snap feel.
+      this.playSweep(pitch * 1.5, pitch, startTime, 0.06, volume, 'square');
+      this.playNote(pitch * 2.2, startTime, 0.03, volume * 0.5, 'triangle');
+    },
+    playCorrect() {
+      if (!state.soundEnabled || !this.ensureContext()) return;
+      const now = this.ctx.currentTime;
+      this.playBrickClick(now + 0.00, 880, 0.11);
+      this.playBrickClick(now + 0.06, 1120, 0.12);
+      this.playNote(1567.98, now + 0.11, 0.09, 0.09, 'triangle');
+    },
+    playWrong() {
+      if (!state.soundEnabled || !this.ensureContext()) return;
+      const now = this.ctx.currentTime;
+      this.playBrickClick(now + 0.00, 280, 0.08);
+      this.playSweep(220, 160, now + 0.055, 0.11, 0.065, 'square');
+    },
+    playClick() {
+      if (!state.soundEnabled || !this.ensureContext()) return;
+      this.playNote(880, this.ctx.currentTime, 0.05, 0.06, 'sine');
+    }
+  };
+
+  const SoundToggle = {
+    btn: null,
+    init() {
+      this.btn = document.getElementById('soundToggleBtn');
+      this.update();
+      this.btn.addEventListener('click', () => {
+        state.soundEnabled = !state.soundEnabled;
+        Storage.saveSound(state.soundEnabled);
+        this.update();
+        if (state.soundEnabled) Sound.playClick();
+      });
+    },
+    update() {
+      this.btn.textContent = state.soundEnabled ? '🔊' : '🔇';
+      this.btn.title = state.soundEnabled ? 'Sesi kapat' : 'Sesi aç';
+    }
+  };
+
+  const GroupManager = {
+    add(group) {
+      group.id = group.id || Util.generateId('grp');
+      group.createdAt = group.createdAt || Date.now();
+      state.groups.push(group);
+      Storage.saveGroups(state.groups);
+    },
+    update(id, data) {
+      const idx = state.groups.findIndex(g => g.id === id);
+      if (idx !== -1) {
+        state.groups[idx] = Object.assign({}, state.groups[idx], data);
+        Storage.saveGroups(state.groups);
+      }
+    },
+    delete(id) {
+      state.groups = state.groups.filter(g => g.id !== id);
+      state.questions = state.questions.filter(q => q.groupId !== id);
+      Storage.saveGroups(state.groups);
+      Storage.saveQuestions(state.questions);
+      delete state.askedIds[id];
+      Storage.saveAsked(state.askedIds);
+    },
+    getById(id) { return state.groups.find(g => g.id === id); },
+    getQuestionCount(groupId) {
+      return state.questions.filter(q => q.groupId === groupId).length;
+    }
+  };
+
+  const QuestionManager = {
+    add(q) {
+      q.id = q.id || Util.generateId('q');
+      q.createdAt = q.createdAt || Date.now();
+      state.questions.push(q);
+      Storage.saveQuestions(state.questions);
+    },
+    update(id, data) {
+      const idx = state.questions.findIndex(q => q.id === id);
+      if (idx !== -1) {
+        state.questions[idx] = Object.assign({}, state.questions[idx], data);
+        Storage.saveQuestions(state.questions);
+      }
+    },
+    delete(id) {
+      state.questions = state.questions.filter(q => q.id !== id);
+      Object.keys(state.askedIds).forEach(gid => {
+        state.askedIds[gid] = state.askedIds[gid].filter(qid => qid !== id);
+      });
+      Storage.saveQuestions(state.questions);
+      Storage.saveAsked(state.askedIds);
+    },
+    getById(id) { return state.questions.find(q => q.id === id); },
+    getByGroup(groupId) { return state.questions.filter(q => q.groupId === groupId); },
+    getRandomUnasked(groupId) {
+      const groupQuestions = this.getByGroup(groupId);
+      if (groupQuestions.length === 0) return null;
+
+      const askedInGroup = state.askedIds[groupId] || [];
+      const unasked = groupQuestions.filter(q => !askedInGroup.includes(q.id));
+
+      if (unasked.length === 0) {
+        state.askedIds[groupId] = [];
+        Storage.saveAsked(state.askedIds);
+        const idx = Math.floor(Math.random() * groupQuestions.length);
+        return groupQuestions[idx];
+      }
+
+      const idx = Math.floor(Math.random() * unasked.length);
+      return unasked[idx];
+    },
+    markAsked(groupId, questionId) {
+      if (!state.askedIds[groupId]) state.askedIds[groupId] = [];
+      if (!state.askedIds[groupId].includes(questionId)) {
+        state.askedIds[groupId].push(questionId);
+        Storage.saveAsked(state.askedIds);
+      }
+    }
+  };
+
+  const StatsBar = {
+    update() {
+      document.getElementById('correctCount').textContent = state.correctCount;
+      document.getElementById('wrongCount').textContent = state.wrongCount;
+    }
+  };
+
+  const GroupsScreen = {
+    el: null,
+    init() { this.el = document.getElementById('contentWrapper'); },
+    show() {
+      state.correctCount = 0;
+      state.wrongCount = 0;
+      state.currentGroupId = null;
+      state.currentQuestion = null;
+      StatsBar.update();
+
+      if (state.groups.length === 0) {
+        this.el.innerHTML =
+          '<div class="empty-state">' +
+            '<div class="emoji">📚</div>' +
+            '<h2>Henüz Grup Yok</h2>' +
+            '<p>Başlamak için yönetici panelinden grup ve soru ekleyin.</p>' +
+            '<button class="btn btn-primary" id="goToAdminBtn">⚙️ Yönetici Paneline Git</button>' +
+          '</div>';
+        document.getElementById('goToAdminBtn').addEventListener('click', () => {
+          AdminModal.requestOpen();
+        });
+        return;
+      }
+
+      const cardsHtml = state.groups.map(g => {
+        const count = GroupManager.getQuestionCount(g.id);
+        const emptyClass = count === 0 ? 'empty' : '';
+        return '<div class="group-card ' + emptyClass + '" data-id="' + g.id + '" style="--group-color: ' + Util.escapeHtml(g.color) + ';">' +
+          '<span class="emoji">' + Util.escapeHtml(g.emoji) + '</span>' +
+          '<div class="group-name">' + Util.escapeHtml(g.name) + '</div>' +
+          '<div class="question-count">' + count + ' soru</div>' +
+        '</div>';
+      }).join('');
+
+      this.el.innerHTML =
+        '<div class="groups-screen">' +
+          '<div class="groups-header">' +
+            '<h1>Hangi Grubu Çalışacaksın?</h1>' +
+            '<p>Bir gruba dokun ve sorulara başla!</p>' +
+          '</div>' +
+          '<div class="groups-grid">' + cardsHtml + '</div>' +
+        '</div>';
+
+      this.el.querySelectorAll('.group-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const id = card.dataset.id;
+          const count = GroupManager.getQuestionCount(id);
+          if (count === 0) {
+            Toast.show('Bu grupta henüz soru yok', 'error');
+            return;
+          }
+          QuestionScreen.start(id);
+        });
+      });
+    }
+  };
+
+  const ResultsScreen = {
+    el: null,
+    init() { this.el = document.getElementById('contentWrapper'); },
+    show() {
+      const correct = state.correctCount;
+      const wrong = state.wrongCount;
+      const total = correct + wrong;
+      const group = GroupManager.getById(state.currentGroupId);
+      const groupName = group ? group.name : '';
+      const pct = total > 0 ? Math.round((correct / total) * 100) : 0;
+      let emoji, msg;
+      if (pct === 100) { emoji = '🏆'; msg = 'Mükemmel! Hepsini bildin!'; }
+      else if (pct >= 70) { emoji = '🎉'; msg = 'Çok iyi! Devam et!'; }
+      else if (pct >= 50) { emoji = '👍'; msg = 'Fena değil, biraz daha çalış!'; }
+      else { emoji = '💪'; msg = 'Daha çok çalışmak gerekiyor!'; }
+
+      this.el.innerHTML =
+        '<div class="question-screen">' +
+          '<div class="question-card" style="text-align: center; max-width: 500px;">' +
+            '<div style="font-size: 72px; margin-bottom: 16px;">' + emoji + '</div>' +
+            '<h2 style="font-family: Fredoka, sans-serif; font-size: 28px; color: var(--primary-dark); margin-bottom: 8px;">' + Util.escapeHtml(groupName) + ' Sonuçları</h2>' +
+            '<p style="color: var(--on-surface-variant); margin-bottom: 32px; font-size: 16px;">' + Util.escapeHtml(msg) + '</p>' +
+            '<div style="display: flex; gap: 16px; justify-content: center; margin-bottom: 32px; flex-wrap: wrap;">' +
+              '<div style="background: var(--success-light); color: var(--success); padding: 20px 32px; border-radius: var(--radius-lg); font-family: Fredoka, sans-serif;">' +
+                '<div style="font-size: 48px; font-weight: 700; line-height: 1;">' + correct + '</div>' +
+                '<div style="font-size: 16px; margin-top: 4px;">Bildin ✓</div>' +
+              '</div>' +
+              '<div style="background: var(--error-light); color: var(--error); padding: 20px 32px; border-radius: var(--radius-lg); font-family: Fredoka, sans-serif;">' +
+                '<div style="font-size: 48px; font-weight: 700; line-height: 1;">' + wrong + '</div>' +
+                '<div style="font-size: 16px; margin-top: 4px;">Bilemedin ✗</div>' +
+              '</div>' +
+            '</div>' +
+            '<div style="margin-bottom: 32px; background: var(--surface-variant); border-radius: var(--radius-md); padding: 12px 20px; display: inline-block;">' +
+              '<span style="font-size: 18px; font-weight: 600; color: var(--primary);">Toplam ' + total + ' sorudan ' + correct + ' doğru (' + pct + '%)</span>' +
+            '</div>' +
+            '<div>' +
+              '<button class="btn btn-primary" id="resultOkBtn" style="font-size: 18px; padding: 16px 40px;">Tamam</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+
+      document.getElementById('resultOkBtn').addEventListener('click', () => GroupsScreen.show());
+    }
+  };
+
+  const QuestionScreen = {
+    el: null,
+    init() { this.el = document.getElementById('contentWrapper'); },
+    start(groupId) {
+      state.currentGroupId = groupId;
+      state.correctCount = 0;
+      state.wrongCount = 0;
+      state.sessionQuestionsAnswered = 0;
+      StatsBar.update();
+      this.showNext();
+    },
+    showNext() {
+      if (state.sessionQuestionsAnswered >= SESSION_LIMIT) {
+        ResultsScreen.show();
+        return;
+      }
+      state.isAnswered = false;
+      const q = QuestionManager.getRandomUnasked(state.currentGroupId);
+      if (!q) {
+        ResultsScreen.show();
+        return;
+      }
+      state.currentQuestion = q;
+      this.render(q);
+    },
+    render(q) {
+      const group = GroupManager.getById(q.groupId);
+      const groupBadge = group
+        ? '<div class="group-badge" style="background: ' + Util.escapeHtml(group.color) + '22; color: ' + Util.escapeHtml(group.color) + ';">' +
+            Util.escapeHtml(group.emoji) + ' ' + Util.escapeHtml(group.name) +
+          '</div>'
+        : '';
+
+      const imageHtml = q.image
+        ? '<div class="question-image-wrapper"><img src="' + Util.escapeHtml(q.image) + '" alt="Soru görseli"></div>'
+        : '';
+
+      const optionsHtml = q.options.map((opt, i) =>
+        '<button class="option-btn" data-index="' + i + '" type="button">' + Util.escapeHtml(opt) + '</button>'
+      ).join('');
+
+      this.el.innerHTML =
+        '<div class="question-screen">' +
+          '<div class="question-card">' +
+            '<button class="btn back-btn" id="backToGroupsBtn">← Gruplara Dön</button>' +
+            '<div class="session-progress">' +
+              '<div class="session-progress-label">Soru ' + (state.sessionQuestionsAnswered + 1) + ' / ' + SESSION_LIMIT + '</div>' +
+              '<div class="session-progress-track">' +
+                '<div class="session-progress-fill" style="width:' + Math.round((state.sessionQuestionsAnswered / SESSION_LIMIT) * 100) + '%"></div>' +
+              '</div>' +
+            '</div>' +
+            groupBadge +
+            imageHtml +
+            '<div class="question-text">' + Util.escapeHtml(q.text) + '</div>' +
+            '<div class="options-grid">' + optionsHtml + '</div>' +
+            '<div class="feedback-message" id="feedbackMessage"></div>' +
+            '<div class="next-btn-wrapper" id="nextBtnWrapper">' +
+              '<button class="btn btn-success" id="nextQuestionBtn"></button>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+
+      document.getElementById('backToGroupsBtn').addEventListener('click', () => GroupsScreen.show());
+      this.el.querySelectorAll('.option-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => this.handleAnswer(e));
+      });
+      const isLastQuestion = (state.sessionQuestionsAnswered + 1) >= SESSION_LIMIT;
+      document.getElementById('nextQuestionBtn').textContent = isLastQuestion ? 'Sonuçları Gör 🏁' : 'Sonraki Soru →';
+      document.getElementById('nextQuestionBtn').addEventListener('click', () => {
+        QuestionManager.markAsked(state.currentGroupId, q.id);
+        this.showNext();
+      });
+    },
+    handleAnswer(e) {
+      if (state.isAnswered) return;
+      state.isAnswered = true;
+
+      const btn = e.currentTarget;
+      const selectedIdx = parseInt(btn.dataset.index, 10);
+      const q = state.currentQuestion;
+      const isCorrect = selectedIdx === q.correctIndex;
+
+      const allButtons = this.el.querySelectorAll('.option-btn');
+      allButtons.forEach((b, i) => {
+        b.disabled = true;
+        if (i === q.correctIndex) {
+          b.classList.add('correct');
+        } else if (i === selectedIdx && !isCorrect) {
+          b.classList.add('wrong');
+        }
+      });
+
+      const feedback = document.getElementById('feedbackMessage');
+      if (isCorrect) {
+        feedback.textContent = '🎉 Aferin! Doğru cevap!';
+        feedback.className = 'feedback-message success';
+        state.correctCount++;
+        try { Sound.playCorrect(); } catch (err) {}
+      } else {
+        feedback.textContent = '😊 Önemli değil, bir sonraki soruya geçelim!';
+        feedback.className = 'feedback-message error';
+        state.wrongCount++;
+        try { Sound.playWrong(); } catch (err) {}
+      }
+      state.sessionQuestionsAnswered++;
+      StatsBar.update();
+      const nextBtn = document.getElementById('nextQuestionBtn');
+      if (state.sessionQuestionsAnswered >= SESSION_LIMIT) {
+        nextBtn.textContent = 'Sonuçları Gör 🏁';
+      } else {
+        nextBtn.textContent = 'Sonraki Soru →';
+      }
+      document.getElementById('nextBtnWrapper').classList.add('visible');
+    }
+  };
+
+  const PinModal = {
+    modal: null,
+    input: null,
+    error: null,
+    onSuccess: null,
+    init() {
+      this.modal = document.getElementById('pinModal');
+      this.input = document.getElementById('pinInput');
+      this.error = document.getElementById('pinError');
+
+      document.getElementById('pinSubmitBtn').addEventListener('click', () => this.submit());
+      document.getElementById('pinCancelBtn').addEventListener('click', () => this.close());
+      this.input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') this.submit();
+      });
+      this.modal.addEventListener('click', (e) => {
+        if (e.target === this.modal) this.close();
+      });
+    },
+    open(callback) {
+      this.onSuccess = callback;
+      this.input.value = '';
+      this.error.textContent = '';
+      this.modal.classList.add('visible');
+      setTimeout(() => this.input.focus(), 100);
+    },
+    close() {
+      this.modal.classList.remove('visible');
+      this.onSuccess = null;
+    },
+    submit() {
+      const entered = this.input.value.trim();
+      const correct = Storage.loadPin();
+      if (entered === correct) {
+        const callback = this.onSuccess;
+        this.close();
+        if (callback) callback();
+      } else {
+        this.error.textContent = 'Hatalı şifre. Tekrar deneyin.';
+        this.input.value = '';
+        this.input.focus();
+      }
+    }
+  };
+
+  const AdminModal = {
+    modal: null,
+    init() {
+      this.modal = document.getElementById('adminModal');
+
+      document.getElementById('adminCloseBtn').addEventListener('click', () => this.close());
+      this.modal.addEventListener('click', (e) => {
+        if (e.target === this.modal) this.close();
+      });
+
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => this.switchTab(tab.dataset.tab));
+      });
+
+      this.initGroupForm();
+      this.initQuestionForm();
+      this.initImageUpload();
+      this.initFilter();
+      this.initDataTab();
+      this.initSettingsTab();
+    },
+    requestOpen() {
+      PinModal.open(() => this.open());
+    },
+    open() {
+      this.modal.classList.add('visible');
+      this.refreshAll();
+      this.switchTab('groups');
+    },
+    close() {
+      this.modal.classList.remove('visible');
+      GroupsScreen.show();
+    },
+    switchTab(tabName) {
+      document.querySelectorAll('.tab').forEach(t => {
+        t.classList.toggle('active', t.dataset.tab === tabName);
+      });
+      document.querySelectorAll('.tab-content').forEach(c => {
+        c.classList.toggle('active', c.id === 'tab-' + tabName);
+      });
+    },
+    refreshAll() {
+      this.refreshGroupsList();
+      this.refreshGroupSelects();
+      this.refreshQuestionsList();
+      this.refreshSettings();
+      this.renderEmojiPicker();
+      this.renderColorPicker();
+      document.getElementById('groupCountBadge').textContent = state.groups.length;
+      document.getElementById('questionCountBadge').textContent = state.questions.length;
+    },
+
+    // ----- GRUP FORM -----
+    initGroupForm() {
+      document.getElementById('groupForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        this.handleGroupSubmit();
+      });
+      document.getElementById('resetGroupFormBtn').addEventListener('click', () => this.resetGroupForm());
+    },
+    renderEmojiPicker() {
+      const picker = document.getElementById('emojiPicker');
+      picker.innerHTML = EMOJI_PALETTE.map(emoji => {
+        const sel = emoji === state.selectedEmoji ? 'selected' : '';
+        return '<button type="button" class="emoji-swatch ' + sel + '" data-emoji="' + Util.escapeHtml(emoji) + '">' + Util.escapeHtml(emoji) + '</button>';
+      }).join('');
+      picker.querySelectorAll('.emoji-swatch').forEach(b => {
+        b.addEventListener('click', () => {
+          state.selectedEmoji = b.dataset.emoji;
+          picker.querySelectorAll('.emoji-swatch').forEach(s => s.classList.remove('selected'));
+          b.classList.add('selected');
+        });
+      });
+    },
+    renderColorPicker() {
+      const picker = document.getElementById('colorPicker');
+      picker.innerHTML = COLOR_PALETTE.map(color => {
+        const sel = color === state.selectedColor ? 'selected' : '';
+        return '<button type="button" class="color-swatch ' + sel + '" data-color="' + color + '" style="background: ' + color + ';" aria-label="Renk: ' + color + '"></button>';
+      }).join('');
+      picker.querySelectorAll('.color-swatch').forEach(b => {
+        b.addEventListener('click', () => {
+          state.selectedColor = b.dataset.color;
+          picker.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+          b.classList.add('selected');
+        });
+      });
+    },
+    handleGroupSubmit() {
+      const name = document.getElementById('groupName').value.trim();
+      if (!name) {
+        Toast.show('Grup adı boş olamaz', 'error');
+        return;
+      }
+      const editId = document.getElementById('groupEditId').value;
+      const data = { name, emoji: state.selectedEmoji, color: state.selectedColor };
+
+      if (editId) {
+        GroupManager.update(editId, data);
+        Toast.show('Grup güncellendi ✓', 'success');
+      } else {
+        GroupManager.add(data);
+        Toast.show('Grup eklendi ✓', 'success');
+      }
+      this.resetGroupForm();
+      this.refreshAll();
+    },
+    resetGroupForm() {
+      document.getElementById('groupForm').reset();
+      document.getElementById('groupEditId').value = '';
+      state.selectedColor = COLOR_PALETTE[3];
+      state.selectedEmoji = EMOJI_PALETTE[0];
+      this.renderEmojiPicker();
+      this.renderColorPicker();
+      document.getElementById('saveGroupBtn').textContent = '💾 Grubu Kaydet';
+    },
+    fillGroupForm(g) {
+      document.getElementById('groupEditId').value = g.id;
+      document.getElementById('groupName').value = g.name;
+      state.selectedColor = g.color;
+      state.selectedEmoji = g.emoji;
+      this.renderEmojiPicker();
+      this.renderColorPicker();
+      document.getElementById('saveGroupBtn').textContent = '💾 Değişiklikleri Kaydet';
+      this.switchTab('groups');
+      document.getElementById('groupName').focus();
+    },
+    refreshGroupsList() {
+      const list = document.getElementById('groupsList');
+      if (state.groups.length === 0) {
+        list.innerHTML = '<div style="text-align: center; padding: 24px; color: var(--on-surface-variant);">Henüz grup yok. Yukarıdan ekleyin.</div>';
+        return;
+      }
+      list.innerHTML = state.groups.map(g => {
+        const count = GroupManager.getQuestionCount(g.id);
+        return '<div class="list-item">' +
+          '<div class="thumb" style="background: ' + Util.escapeHtml(g.color) + '22; color: ' + Util.escapeHtml(g.color) + ';">' + Util.escapeHtml(g.emoji) + '</div>' +
+          '<div class="info">' +
+            '<div class="item-title">' + Util.escapeHtml(g.name) + '</div>' +
+            '<div class="item-subtitle">' + count + ' soru</div>' +
+          '</div>' +
+          '<div class="actions">' +
+            '<button class="icon-action-btn edit-group-btn" data-id="' + g.id + '" title="Düzenle">✏️</button>' +
+            '<button class="icon-action-btn delete delete-group-btn" data-id="' + g.id + '" title="Sil">🗑️</button>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+
+      list.querySelectorAll('.edit-group-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const g = GroupManager.getById(btn.dataset.id);
+          if (g) this.fillGroupForm(g);
+        });
+      });
+      list.querySelectorAll('.delete-group-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const g = GroupManager.getById(btn.dataset.id);
+          if (!g) return;
+          const count = GroupManager.getQuestionCount(g.id);
+          const msg = count > 0
+            ? '"' + g.name + '" grubunu ve içindeki ' + count + ' soruyu silmek istediğinize emin misiniz?'
+            : '"' + g.name + '" grubunu silmek istediğinize emin misiniz?';
+          if (confirm(msg)) {
+            GroupManager.delete(g.id);
+            this.refreshAll();
+            Toast.show('Grup silindi', 'success');
+          }
+        });
+      });
+    },
+    refreshGroupSelects() {
+      const opts = state.groups.length === 0
+        ? '<option value="">Önce bir grup ekleyin</option>'
+        : state.groups.map(g => '<option value="' + g.id + '">' + Util.escapeHtml(g.emoji) + ' ' + Util.escapeHtml(g.name) + '</option>').join('');
+
+      const questionGroup = document.getElementById('questionGroup');
+      const prevValue = questionGroup.value;
+      questionGroup.innerHTML = opts;
+      if (prevValue && state.groups.find(g => g.id === prevValue)) {
+        questionGroup.value = prevValue;
+      }
+
+      const filterGroup = document.getElementById('filterGroup');
+      const prevFilter = filterGroup.value;
+      filterGroup.innerHTML = '<option value="">Tüm Gruplar</option>' +
+        state.groups.map(g => '<option value="' + g.id + '">' + Util.escapeHtml(g.emoji) + ' ' + Util.escapeHtml(g.name) + '</option>').join('');
+      if (prevFilter) filterGroup.value = prevFilter;
+    },
+
+    // ----- SORU FORM -----
+    initQuestionForm() {
+      document.getElementById('questionForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        this.handleQuestionSubmit();
+      });
+      document.getElementById('resetFormBtn').addEventListener('click', () => this.resetQuestionForm());
+    },
+    handleQuestionSubmit() {
+      const groupId = document.getElementById('questionGroup').value;
+      const text = document.getElementById('questionText').value.trim();
+      const options = [
+        document.getElementById('option0').value.trim(),
+        document.getElementById('option1').value.trim(),
+        document.getElementById('option2').value.trim(),
+        document.getElementById('option3').value.trim()
+      ];
+      const correctRadio = document.querySelector('input[name="correctOption"]:checked');
+
+      if (!groupId) { Toast.show('Önce bir grup seçin (yoksa oluşturun)', 'error'); return; }
+      if (!text) { Toast.show('Soru metni boş olamaz', 'error'); return; }
+      if (options.some(o => !o)) { Toast.show('Tüm şıkları doldurun', 'error'); return; }
+      if (!correctRadio) { Toast.show('Doğru cevabı işaretleyin', 'error'); return; }
+
+      const editId = document.getElementById('editId').value;
+      const data = {
+        groupId,
+        text,
+        options,
+        correctIndex: parseInt(correctRadio.value, 10),
+        image: state.currentImageData
+      };
+
+      if (editId) {
+        QuestionManager.update(editId, data);
+        Toast.show('Soru güncellendi ✓', 'success');
+      } else {
+        QuestionManager.add(data);
+        Toast.show('Soru eklendi ✓', 'success');
+      }
+      this.resetQuestionForm();
+      this.refreshAll();
+      this.switchTab('list');
+    },
+    resetQuestionForm() {
+      document.getElementById('questionForm').reset();
+      document.getElementById('editId').value = '';
+      this.clearImagePreview();
+      document.getElementById('saveQuestionBtn').textContent = '💾 Soruyu Kaydet';
+    },
+    fillQuestionForm(q) {
+      document.getElementById('editId').value = q.id;
+      document.getElementById('questionGroup').value = q.groupId;
+      document.getElementById('questionText').value = q.text;
+      q.options.forEach((opt, i) => {
+        document.getElementById('option' + i).value = opt;
+      });
+      document.getElementById('correct' + q.correctIndex).checked = true;
+
+      if (q.image) {
+        state.currentImageData = q.image;
+        // if it's a URL (not data:), populate the URL input too
+        if (!q.image.startsWith('data:')) {
+          document.getElementById('imageUrlInput').value = q.image;
+        } else {
+          document.getElementById('imageUrlInput').value = '';
+        }
+        this.showImagePreview(q.image);
+      } else {
+        this.clearImagePreview();
+      }
+
+      document.getElementById('saveQuestionBtn').textContent = '💾 Değişiklikleri Kaydet';
+      this.switchTab('add');
+      document.getElementById('questionText').focus();
+    },
+
+    initImageUpload() {
+      const input = document.getElementById('imageInput');
+      input.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (file.size > 2 * 1024 * 1024) {
+          Toast.show("Resim 2MB'den küçük olmalı", 'error');
+          input.value = '';
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          state.currentImageData = ev.target.result;
+          document.getElementById('imageUrlInput').value = '';
+          this.showImagePreview(ev.target.result);
+        };
+        reader.readAsDataURL(file);
+      });
+
+      document.getElementById('imageUrlBtn').addEventListener('click', () => {
+        const url = document.getElementById('imageUrlInput').value.trim();
+        if (!url) { Toast.show('URL boş olamaz', 'error'); return; }
+        // basic URL validation
+        try { new URL(url); } catch { Toast.show('Geçersiz URL', 'error'); return; }
+        state.currentImageData = url;
+        document.getElementById('imageInput').value = '';
+        this.showImagePreview(url);
+      });
+
+      document.getElementById('imageUrlInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); document.getElementById('imageUrlBtn').click(); }
+      });
+
+      document.getElementById('removeImageBtn').addEventListener('click', () => {
+        this.clearImagePreview();
+      });
+    },
+    showImagePreview(dataUrl) {
+      document.getElementById('imagePreview').src = dataUrl;
+      document.getElementById('imagePreview').style.display = 'block';
+      document.getElementById('imageUploadText').style.display = 'none';
+      document.getElementById('removeImageBtn').style.display = 'inline-flex';
+    },
+    clearImagePreview() {
+      document.getElementById('imagePreview').src = '';
+      document.getElementById('imagePreview').style.display = 'none';
+      document.getElementById('imageUploadText').style.display = 'block';
+      document.getElementById('removeImageBtn').style.display = 'none';
+      document.getElementById('imageInput').value = '';
+      document.getElementById('imageUrlInput').value = '';
+      state.currentImageData = null;
+    },
+
+    initFilter() {
+      document.getElementById('filterGroup').addEventListener('change', () => {
+        this.refreshQuestionsList();
+      });
+    },
+
+    refreshQuestionsList() {
+      const list = document.getElementById('questionsList');
+      const filterValue = document.getElementById('filterGroup').value;
+      const filtered = filterValue
+        ? state.questions.filter(q => q.groupId === filterValue)
+        : state.questions;
+
+      if (filtered.length === 0) {
+        list.innerHTML = '<div style="text-align: center; padding: 40px 20px; color: var(--on-surface-variant);">' +
+          '<div style="font-size: 48px; margin-bottom: 8px;">📭</div>' +
+          '<div>' + (filterValue ? 'Bu grupta soru yok' : 'Henüz soru eklenmedi') + '</div>' +
+        '</div>';
+        return;
+      }
+
+      list.innerHTML = filtered.map(q => {
+        const group = GroupManager.getById(q.groupId);
+        const groupBadge = group
+          ? '<span style="display: inline-block; padding: 2px 8px; background: ' + Util.escapeHtml(group.color) + '22; color: ' + Util.escapeHtml(group.color) + '; border-radius: 6px; font-size: 11px; font-weight: 600; margin-right: 6px;">' + Util.escapeHtml(group.emoji) + ' ' + Util.escapeHtml(group.name) + '</span>'
+          : '<span style="color: var(--error);">[Grup silinmiş]</span>';
+        const thumb = q.image
+          ? '<div class="thumb"><img src="' + Util.escapeHtml(q.image) + '" alt=""></div>'
+          : '<div class="thumb">' + (group ? Util.escapeHtml(group.emoji) : '🧮') + '</div>';
+        const correctAnswer = q.options[q.correctIndex] || '';
+        return '<div class="list-item">' +
+          thumb +
+          '<div class="info">' +
+            '<div class="item-title">' + Util.escapeHtml(q.text) + '</div>' +
+            '<div class="item-subtitle">' + groupBadge + 'Doğru: <strong>' + Util.escapeHtml(correctAnswer) + '</strong></div>' +
+          '</div>' +
+          '<div class="actions">' +
+            '<button class="icon-action-btn edit-q-btn" data-id="' + q.id + '" title="Düzenle">✏️</button>' +
+            '<button class="icon-action-btn delete delete-q-btn" data-id="' + q.id + '" title="Sil">🗑️</button>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+
+      list.querySelectorAll('.edit-q-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const q = QuestionManager.getById(btn.dataset.id);
+          if (q) this.fillQuestionForm(q);
+        });
+      });
+      list.querySelectorAll('.delete-q-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (confirm('Bu soruyu silmek istediğinize emin misiniz?')) {
+            QuestionManager.delete(btn.dataset.id);
+            this.refreshAll();
+            Toast.show('Soru silindi', 'success');
+          }
+        });
+      });
+    },
+
+    initDataTab() {
+      document.getElementById('exportBtn').addEventListener('click', () => this.exportData());
+      document.getElementById('importInput').addEventListener('change', (e) => this.importData(e));
+      document.getElementById('clearAllBtn').addEventListener('click', () => this.clearAll());
+    },
+    exportData() {
+      if (state.questions.length === 0 && state.groups.length === 0) {
+        Toast.show('Dışa aktarılacak veri yok', 'error');
+        return;
+      }
+      const exportObj = {
+        version: 2,
+        exportedAt: new Date().toISOString(),
+        groupsCount: state.groups.length,
+        questionsCount: state.questions.length,
+        groups: state.groups,
+        questions: state.questions
+      };
+      const json = JSON.stringify(exportObj, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const date = new Date().toISOString().slice(0, 10);
+      a.href = url;
+      a.download = 'dort-islem-' + date + '.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      Toast.show('Veriler indirildi ✓', 'success');
+    },
+    importData(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        try {
+          const data = JSON.parse(ev.target.result);
+          if (!data.questions || !Array.isArray(data.questions)) {
+            throw new Error('Geçersiz dosya formatı');
+          }
+
+          let importedGroups = [];
+          if (data.groups && Array.isArray(data.groups)) {
+            importedGroups = data.groups.map(g => ({
+              id: g.id || Util.generateId('grp'),
+              name: g.name || 'Grup',
+              emoji: g.emoji || '📁',
+              color: g.color || '#6750A4',
+              createdAt: g.createdAt || Date.now()
+            }));
+          }
+
+          const valid = data.questions.every(q =>
+            q && typeof q.text === 'string' &&
+            Array.isArray(q.options) && q.options.length === 4 &&
+            typeof q.correctIndex === 'number' &&
+            q.correctIndex >= 0 && q.correctIndex <= 3
+          );
+          if (!valid) throw new Error('Soru yapısı geçersiz');
+
+          // V1 dosyasında grup yoksa varsayılan oluştur
+          let v1FallbackGroupId = null;
+          if (importedGroups.length === 0 && data.questions.some(q => !q.groupId)) {
+            const fallback = {
+              id: Util.generateId('grp'),
+              name: 'İçe Aktarılan',
+              emoji: '📦',
+              color: '#6750A4',
+              createdAt: Date.now()
+            };
+            importedGroups.push(fallback);
+            v1FallbackGroupId = fallback.id;
+          }
+
+          const importedQuestions = data.questions.map(q => ({
+            id: q.id || Util.generateId('q'),
+            groupId: q.groupId || v1FallbackGroupId || (importedGroups[0] && importedGroups[0].id),
+            text: q.text,
+            options: q.options,
+            correctIndex: q.correctIndex,
+            image: q.image || null,
+            createdAt: q.createdAt || Date.now()
+          }));
+
+          const mode = document.querySelector('input[name="importMode"]:checked').value;
+
+          if (mode === 'replace') {
+            state.groups = importedGroups;
+            state.questions = importedQuestions;
+            state.askedIds = {};
+          } else {
+            const existingGroupIds = new Set(state.groups.map(g => g.id));
+            state.groups = state.groups.concat(importedGroups.filter(g => !existingGroupIds.has(g.id)));
+
+            const existingQuestionIds = new Set(state.questions.map(q => q.id));
+            state.questions = state.questions.concat(importedQuestions.filter(q => !existingQuestionIds.has(q.id)));
+          }
+
+          Storage.saveGroups(state.groups);
+          Storage.saveQuestions(state.questions);
+          Storage.saveAsked(state.askedIds);
+
+          this.refreshAll();
+          Toast.show(importedGroups.length + ' grup, ' + importedQuestions.length + ' soru içe aktarıldı ✓', 'success');
+        } catch (err) {
+          Toast.show('İçe aktarma hatası: ' + err.message, 'error');
+        }
+      };
+      reader.readAsText(file);
+      e.target.value = '';
+    },
+    clearAll() {
+      if (state.questions.length === 0 && state.groups.length === 0) {
+        Toast.show('Silinecek veri yok', 'error');
+        return;
+      }
+      if (!confirm(state.groups.length + ' grup ve ' + state.questions.length + ' sorunun TAMAMI silinecek. Devam edilsin mi?')) return;
+      if (!confirm('Bu işlem geri alınamaz. Yedeklediniz mi?')) return;
+      state.groups = [];
+      state.questions = [];
+      state.askedIds = {};
+      Storage.saveGroups(state.groups);
+      Storage.saveQuestions(state.questions);
+      Storage.saveAsked(state.askedIds);
+      this.refreshAll();
+      Toast.show('Tüm veriler silindi', 'success');
+    },
+
+    initSettingsTab() {
+      document.getElementById('savePinBtn').addEventListener('click', () => {
+        const newPin = document.getElementById('pinInputSetting').value.trim();
+        if (!/^\d{4}$/.test(newPin)) {
+          Toast.show('Şifre 4 haneli rakam olmalı', 'error');
+          return;
+        }
+        Storage.savePin(newPin);
+        Toast.show('Şifre güncellendi ✓', 'success');
+      });
+    },
+    refreshSettings() {
+      document.getElementById('pinInputSetting').value = Storage.loadPin();
+    }
+  };
+
+  function init() {
+    Toast.init();
+    migrate();
+    state.questions = Storage.loadQuestions();
+    state.groups = Storage.loadGroups();
+    state.askedIds = Storage.loadAsked();
+    state.soundEnabled = Storage.loadSound();
+
+    SoundToggle.init();
+    GroupsScreen.init();
+    QuestionScreen.init();
+    ResultsScreen.init();
+    PinModal.init();
+    AdminModal.init();
+
+    document.getElementById('settingsBtn').addEventListener('click', () => {
+      AdminModal.requestOpen();
+    });
+    document.getElementById('topBarTitle').addEventListener('click', () => {
+      GroupsScreen.show();
+    });
+
+    GroupsScreen.show();
+    StatsBar.update();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+</body>
+</html>
