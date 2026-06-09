@@ -27,7 +27,7 @@ Deno.serve(async (request: Request) => {
     return jsonResponse({ error: "Valid email is required" }, 400);
   }
 
-  const redirectTo = Deno.env.get("INVITE_REDIRECT_TO") || undefined;
+  const redirectTo = Deno.env.get("INVITE_REDIRECT_TO") || "https://aykut-canturk.github.io/";
 
   const result = await auth.ctx.admin.auth.admin.inviteUserByEmail(email, {
     data: fullName ? { display_name: fullName } : undefined,
