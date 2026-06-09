@@ -48,6 +48,11 @@
   .field input{width:100%;font-family:"Nunito";font-weight:600;font-size:1.05rem;color:var(--ink);
     padding:14px 16px;border:3px solid var(--line);border-radius:16px;background:#F7FBF9}
   .field input:focus{outline:none;border-color:var(--leaf)}
+  .field input:-webkit-autofill{
+    -webkit-text-fill-color:var(--ink);
+    box-shadow:0 0 0 1000px #F7FBF9 inset;
+    transition:background-color 9999s ease-in-out 0s;
+  }
   .btn-primary{width:100%;font-family:"Fredoka",sans-serif;font-weight:600;font-size:1.25rem;
     color:#fff;background:var(--leaf);border:none;border-radius:18px;padding:16px;
     cursor:pointer;margin-top:6px;transition:background .15s, transform .1s}
@@ -140,20 +145,22 @@
     <h2 class="auth-title" id="authTitle">Giriş yap</h2>
     <p class="auth-sub" id="authSub">Kaldığın yerden devam et</p>
 
-    <div class="field" id="nameField" style="display:none">
-      <label for="name">Adın</label>
-      <input id="name" type="text" autocomplete="given-name" placeholder="Örn: Ela">
-    </div>
-    <div class="field">
-      <label for="email">E-posta</label>
-      <input id="email" type="email" autocomplete="email" placeholder="ornek@eposta.com">
-    </div>
-    <div class="field" id="passwordField">
-      <label for="password">Şifre</label>
-      <input id="password" type="password" autocomplete="current-password" placeholder="••••••••">
-    </div>
+    <form id="authForm">
+      <div class="field" id="nameField" style="display:none">
+        <label for="name">Adın</label>
+        <input id="name" name="name" type="text" autocomplete="given-name" placeholder="Örn: Ela">
+      </div>
+      <div class="field">
+        <label for="email">E-posta</label>
+        <input id="email" name="email" type="email" autocomplete="email" placeholder="ornek@eposta.com">
+      </div>
+      <div class="field" id="passwordField">
+        <label for="password">Şifre</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" placeholder="••••••••">
+      </div>
+      <button class="btn-primary" id="authBtn" type="submit">Giriş yap</button>
+    </form>
 
-    <button class="btn-primary" id="authBtn" type="button">Giriş yap</button>
     <p class="msg" id="authMsg"></p>
     <p class="linkrow" id="forgotRow"><a id="forgotLink">Şifremi unuttum?</a></p>
     <p class="switch" id="authSwitch">Hesabın yok mu? <a id="switchLink">Kayıt ol</a></p>
@@ -164,11 +171,13 @@
     <p class="eyebrow">Güvenlik</p>
     <h2 class="auth-title" id="resetTitle">Yeni şifre belirle</h2>
     <p class="auth-sub" id="resetSub">En az 6 karakter</p>
-    <div class="field">
-      <label for="newpass">Yeni şifre</label>
-      <input id="newpass" type="password" autocomplete="new-password" placeholder="••••••••">
-    </div>
-    <button class="btn-primary" id="resetBtn" type="button">Şifreyi kaydet</button>
+    <form id="resetForm">
+      <div class="field">
+        <label for="newpass">Yeni şifre</label>
+        <input id="newpass" name="new-password" type="password" autocomplete="new-password" placeholder="••••••••">
+      </div>
+      <button class="btn-primary" id="resetBtn" type="submit">Şifreyi kaydet</button>
+    </form>
     <p class="msg" id="resetMsg"></p>
     <p class="linkrow"><a id="resetBack">← Geri</a></p>
   </main>
@@ -306,9 +315,7 @@ function startAuth(sb){
     }catch(err){ setMsg(translateError(err.message),"err"); els.btn.disabled=false; }
   }
 
-  els.btn.addEventListener("click", handleSubmit);
-  els.password.addEventListener("keydown", e=>{ if(e.key==="Enter") handleSubmit(); });
-  els.email.addEventListener("keydown", e=>{ if(e.key==="Enter" && mode==="forgot") handleSubmit(); });
+  $("authForm").addEventListener("submit", e=>{ e.preventDefault(); handleSubmit(); });
 
   // ---- Yeni şifre belirleme ekranı ----
   function showNewPass(fromRecovery){
@@ -340,8 +347,7 @@ function startAuth(sb){
       }
     }catch(err){ setResetMsg(translateError(err.message),"err"); $("resetBtn").disabled=false; }
   }
-  $("resetBtn").addEventListener("click", saveNewPassword);
-  $("newpass").addEventListener("keydown", e=>{ if(e.key==="Enter") saveNewPassword(); });
+  $("resetForm").addEventListener("submit", e=>{ e.preventDefault(); saveNewPassword(); });
   $("resetBack").addEventListener("click", ()=>{
     if(resetFromRecovery){ sb.auth.signOut(); }   // → girişe döner
     else { show("app"); }                          // oyuna geri (durum korunur)
