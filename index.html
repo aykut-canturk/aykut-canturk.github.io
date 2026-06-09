@@ -1060,24 +1060,11 @@
       <h2 id="authTitle">Giriş Yap</h2>
       <p class="auth-sub" id="authSub">Çalışmaya devam etmek için giriş yap</p>
 
-      <form id="authForm" autocomplete="on">
-        <div class="form-group" id="afName" style="display:none; margin-bottom:14px;">
-          <label for="afNameInput">Adın</label>
-          <input class="form-input" id="afNameInput" name="name" type="text" autocomplete="given-name" placeholder="Örn: Ela">
-        </div>
-        <div class="form-group" id="afEmail" style="margin-bottom:14px;">
-          <label for="afEmailInput">E-posta</label>
-          <input class="form-input" id="afEmailInput" name="email" type="email" autocomplete="email" placeholder="ornek@eposta.com">
-        </div>
-        <div class="form-group" id="afPassword" style="margin-bottom:14px;">
-          <label for="afPasswordInput">Şifre</label>
-          <input class="form-input" id="afPasswordInput" name="password" type="password" autocomplete="current-password" placeholder="••••••••">
-        </div>
-        <button class="btn btn-primary" id="authSubmitBtn" type="submit">Giriş Yap</button>
-      </form>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <button class="btn btn-primary" id="googleLoginBtn" type="button">Google ile Giriş Yap</button>
+      </div>
 
       <div class="auth-msg" id="authMsg"></div>
-      <div class="auth-links" id="forgotRow"><a id="forgotLink">Şifremi unuttum?</a></div>
       <div class="auth-links" id="switchRow">Hesabın yoksa yöneticiden davet iste.</div>
     </div>
 
@@ -2450,7 +2437,7 @@ const SUPABASE_ANON_KEY = (window.APP_CONFIG && window.APP_CONFIG.SUPABASE_ANON_
 const ADMIN_EMAILS      = (window.APP_CONFIG && Array.isArray(window.APP_CONFIG.ADMIN_EMAILS)) ? window.APP_CONFIG.ADMIN_EMAILS : [];
 const INVITE_FUNCTION_NAME = (window.APP_CONFIG && window.APP_CONFIG.INVITE_FUNCTION_NAME) || "invite-user";
 const LIST_USERS_FUNCTION_NAME = (window.APP_CONFIG && window.APP_CONFIG.LIST_USERS_FUNCTION_NAME) || "list-users";
-const RESET_PASSWORD_REDIRECT_TO = (window.APP_CONFIG && window.APP_CONFIG.RESET_PASSWORD_REDIRECT_TO) || (window.location.origin + window.location.pathname);
+const GOOGLE_AUTH_REDIRECT_TO = (window.APP_CONFIG && window.APP_CONFIG.GOOGLE_AUTH_REDIRECT_TO) || (window.location.origin + window.location.pathname);
 
 (function () {
   'use strict';
@@ -2473,7 +2460,6 @@ const RESET_PASSWORD_REDIRECT_TO = (window.APP_CONFIG && window.APP_CONFIG.RESET
   window.__authClient = sb;
   window.__authIsAdmin = false;
 
-  let mode = "login";                         // login | forgot
   let recovering = window.location.hash.indexOf("type=recovery") !== -1;
   let started = false;
   let resetFromRecovery = false;
@@ -2495,52 +2481,28 @@ const RESET_PASSWORD_REDIRECT_TO = (window.APP_CONFIG && window.APP_CONFIG.RESET
   function setResetMsg(t,type){ const m=$("resetMsg"); m.textContent=t||""; m.className="auth-msg "+(type||""); }
   function setInviteMsg(t,type){ const m=$("inviteMsg"); m.textContent=t||""; m.className="auth-msg "+(type||""); }
   function trErr(m){
-    if(/Invalid login/i.test(m)) return "E-posta veya şifre hatalı.";
-    if(/already registered|already been registered/i.test(m)) return "Bu e-posta zaten kayıtlı.";
-    if(/signups not allowed|signup is disabled|forbidden/i.test(m)) return "Yeni kayıt kapalı. Lütfen yöneticiden davet isteyin.";
-    if(/at least 6/i.test(m)) return "Şifre en az 6 karakter olmalı.";
-    if(/Email not confirmed/i.test(m)) return "E-postanı onaylaman gerekiyor.";
+    if(/provider is not enabled/i.test(m)) return "Google girişi etkin değil. Supabase > Auth > Providers bölümünden Google'ı açın.";
+    if(/popup|redirect|oauth/i.test(m)) return "Google girişinde yönlendirme hatası oluştu. Redirect URL ayarlarını kontrol edin.";
+    if(/forbidden|not allowed/i.test(m)) return "Bu hesapla girişe izin verilmiyor.";
     return m;
   }
 
-  function renderMode(){
+  function renderGoogleAuth(){
     setMsg("");
-    const nameG=$("afName"), passG=$("afPassword"), forgotRow=$("forgotRow"), switchRow=$("switchRow");
-    nameG.style.display="none";
-    if(mode==="login"){
-      $("authTitle").textContent="Giriş Yap"; $("authSub").textContent="Çalışmaya devam etmek için giriş yap";
-      passG.style.display="block";
-      $("authSubmitBtn").textContent="Giriş Yap"; forgotRow.style.display="block";
-      switchRow.textContent='Hesabın yoksa yöneticiden davet iste.';
-    } else {
-      $("authTitle").textContent="Şifremi Unuttum"; $("authSub").textContent="E-postana sıfırlama bağlantısı gönderelim";
-      passG.style.display="none";
-      $("authSubmitBtn").textContent="Bağlantı Gönder"; forgotRow.style.display="none";
-      switchRow.innerHTML='<a id="switchLink">← Girişe dön</a>';
-      const sl=$("switchLink");
-      if(sl) sl.onclick=function(){ mode="login"; renderMode(); };
-    }
+    $("authTitle").textContent="Google ile Giriş";
+    $("authSub").textContent="Davet edilen kullanıcılar Google hesabıyla giriş yapabilir";
+    $("switchRow").textContent='Hesabın yoksa yöneticiden davet iste.';
   }
 
-  $("forgotLink").onclick=function(){ mode="forgot"; renderMode(); };
-
-  /* ---------- Form gönderimi (autofill uyumlu) ---------- */
-  $("authForm").addEventListener("submit", async function(e){
-    e.preventDefault();
-    const email=$("afEmailInput").value.trim();
-    const password=$("afPasswordInput").value;
-    const btn=$("authSubmitBtn");
-    if(!email){ setMsg("E-posta gerekli.","err"); return; }
-    btn.disabled=true;
+  $("googleLoginBtn").addEventListener("click", async function(){
+    const btn = $("googleLoginBtn");
+    btn.disabled = true;
+    setMsg("Google yönlendirmesi hazırlanıyor…", "");
     try{
-      if(mode==="forgot"){
-        const redirectTo = RESET_PASSWORD_REDIRECT_TO;
-        const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo });
-        if(error) throw error;
-        setMsg("Sıfırlama bağlantısı e-postana gönderildi. 📬","ok"); btn.disabled=false; return;
-      }
-      if(!password){ setMsg("Şifre gerekli.","err"); btn.disabled=false; return; }
-      const { error } = await sb.auth.signInWithPassword({ email, password });
+      const { error } = await sb.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: GOOGLE_AUTH_REDIRECT_TO }
+      });
       if(error) throw error;
     }catch(err){ setMsg(trErr(err.message),"err"); btn.disabled=false; }
   });
@@ -2578,7 +2540,7 @@ const RESET_PASSWORD_REDIRECT_TO = (window.APP_CONFIG && window.APP_CONFIG.RESET
 
   /* ---------- Üst bar butonları ---------- */
   $("logoutBtnTB").onclick=function(){ sb.auth.signOut().then(function(){ location.reload(); }); };
-  $("changePwBtnTB").onclick=function(){ openReset(false); };
+  $("changePwBtnTB").style.display = "none";
   $("progressBtn").onclick=function(){ openProgress(); };
   $("inviteBtnTB").onclick=function(){ openInviteModal(); };
   $("progressCloseBtn").onclick=function(){ $("progressModal").classList.remove("visible"); };
@@ -2762,14 +2724,14 @@ const RESET_PASSWORD_REDIRECT_TO = (window.APP_CONFIG && window.APP_CONFIG.RESET
   }
 
   /* ---------- Oturum takibi ---------- */
-  showForms(); renderMode();
+  showForms(); renderGoogleAuth();
   sb.auth.onAuthStateChange(function(event, session){
     if(event==="PASSWORD_RECOVERY"){ recovering=true; openReset(true); return; }
     if(event==="SIGNED_OUT" || !session){
       currentUser=null; started=false;
       $("authControls").style.display="none";
       syncAdminVisibility(null);
-      overlay.style.display="flex"; mode="login"; renderMode(); showForms();
+      overlay.style.display="flex"; renderGoogleAuth(); showForms();
       return;
     }
     if(session && session.user){

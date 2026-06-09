@@ -18,6 +18,8 @@ window.APP_CONFIG = {
   ],
   // Şifre sıfırlama mailindeki dönüş adresi (production URL)
   RESET_PASSWORD_REDIRECT_TO: "https://aykut-canturk.github.io/",
+  // Google OAuth dönüş adresi
+  GOOGLE_AUTH_REDIRECT_TO: "https://aykut-canturk.github.io/",
   // Supabase Edge Function adı (auth admin invite çağrısını server-side yapmalı)
   INVITE_FUNCTION_NAME: "invite-user",
   // Supabase Edge Function adı (admin kullanıcı listesini döndürmeli)
