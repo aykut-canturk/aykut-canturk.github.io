@@ -1,39 +1,30 @@
 # aykut-canturk.github.io
 
-## Admin-Only User Management (GitHub Pages Uyumlu)
+## Mimari Özeti
 
-Bu projede istemci static (GitHub Pages) olduğu için admin işlemleri Supabase Edge Function ile server-side yapılır.
+- Giriş modeli: yalnızca Google OAuth
+- Kullanıcı modeli: admin davet eder, kullanıcı davet sonrası Google ile giriş yapar
+- Admin yetkisi: `ADMIN_EMAILS` allowlist
+- Frontend: statik (GitHub Pages)
+- Admin işlemleri: Supabase Edge Functions
 
-Eklenen function'lar:
+Edge Functions:
 
 - `supabase/functions/invite-user/index.ts`
 - `supabase/functions/list-users/index.ts`
 - `supabase/functions/_shared/admin-auth.ts`
 
-### 1) Gerekenler
+## Kurulum
 
-- Supabase projesi
-- Supabase CLI
-
-Supabase CLI kurulumu:
+1. Supabase CLI
 
 ```bash
 npm i -g supabase
-```
-
-Login ve link:
-
-```bash
 supabase login
 supabase link --project-ref YOUR_PROJECT_REF
 ```
 
-`YOUR_PROJECT_REF`, Supabase URL içindeki alt alan adıdır.
-Örn: `https://fnpzxhpryksjxduhejtx.supabase.co` için `fnpzxhpryksjxduhejtx`.
-
-### 2) Function Secret'ları
-
-Bu secret'ları Supabase'e set edin:
+1. Function secret'ları
 
 ```bash
 supabase secrets set \
@@ -42,52 +33,52 @@ supabase secrets set \
   INVITE_REDIRECT_TO="https://YOUR_GITHUB_USERNAME.github.io/"
 ```
 
-Not:
-
-- `SUPABASE_` ile başlayan env adları `supabase secrets set` tarafından engellenir.
-- `SERVICE_ROLE_KEY` sadece function ortamında olmalı, istemciye konmamalı.
-- `ADMIN_EMAILS` virgülle ayrılmış allowlist'tir.
-
-### 3) Deploy
+1. Deploy
 
 ```bash
 supabase functions deploy invite-user
 supabase functions deploy list-users
 ```
 
-### 4) Client Config
+## Supabase Auth Ayarları
 
-`config.js` içinde aşağıdakiler bulunmalı:
+1. Authentication > Providers > Google
+
+- Google provider aktif olmalı
+- Google OAuth Client ID / Secret girilmeli
+
+1. Google Cloud OAuth Client
+
+- Authorized redirect URI:
+  `https://YOUR_PROJECT_REF.supabase.co/auth/v1/callback`
+
+1. Authentication > URL Configuration
+
+- Site URL: `https://YOUR_GITHUB_USERNAME.github.io/`
+- Redirect URLs: `https://YOUR_GITHUB_USERNAME.github.io/`
+
+1. Email provider
+
+- Self-signup kapalı tutulmalı (Google-only model)
+
+## İstemci Konfigürasyonu
+
+`config.js` örneği:
 
 ```js
 window.APP_CONFIG = {
   SUPABASE_URL: "https://YOUR_PROJECT_REF.supabase.co",
   SUPABASE_ANON_KEY: "YOUR_ANON_KEY",
   ADMIN_EMAILS: ["admin1@example.com"],
+  GOOGLE_AUTH_REDIRECT_TO: "https://YOUR_GITHUB_USERNAME.github.io/",
   INVITE_FUNCTION_NAME: "invite-user",
   LIST_USERS_FUNCTION_NAME: "list-users"
 };
 ```
 
-### 5) Supabase Auth Ayarı
+## Hızlı Kontrol
 
-- Authentication > Providers > Email altında self-signup kapatın.
-
-### 6) Test Senaryosu
-
-1. Admin e-posta ile giriş yapın.
-2. Üst barda `⚙️` ve `✉️` görünmeli.
-3. `⚙️` > `👥 Kullanıcılar` sekmesinde liste yüklenmeli.
-4. `✉️` ile davet gönderildiğinde kullanıcıya mail gitmeli.
-5. Admin olmayan kullanıcıda `⚙️` ve `✉️` görünmemeli.
-
-### 7) Sık Hata / Çözüm
-
-- `Admin access required`
-  - Giriş yapan e-posta `ADMIN_EMAILS` içinde değildir.
-
-- `Missing env var`
-  - `supabase secrets set` ile gerekli secret eksik girilmiştir.
-
-- `Function not found`
-  - `INVITE_FUNCTION_NAME` veya `LIST_USERS_FUNCTION_NAME` ile deploy adı farklıdır.
+1. Admin Google ile giriş yapar, `⚙️` ve `✉️` görür.
+2. Admin davet gönderir.
+3. Davet edilen kullanıcı Google ile giriş yapar.
+4. Admin olmayan kullanıcı `⚙️` ve `✉️` görmez.

@@ -818,7 +818,6 @@
       <span id="tbUserName" style="color:#fff; font-weight:700; font-size:14px; text-shadow:1px 1px 0 var(--lego-black); max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></span>
       <button class="btn btn-icon" id="progressBtn" aria-label="Gelişimim" title="Gelişimim">📈</button>
       <button class="btn btn-icon" id="inviteBtnTB" aria-label="Kullanıcı davet et" title="Kullanıcı davet et" style="display:none;">✉️</button>
-      <button class="btn btn-icon" id="changePwBtnTB" aria-label="Şifre" title="Şifreyi değiştir">🔑</button>
       <button class="btn btn-icon" id="logoutBtnTB" aria-label="Çıkış" title="Çıkış">🚪</button>
     </div>
   </div>
@@ -1066,22 +1065,6 @@
 
       <div class="auth-msg" id="authMsg"></div>
       <div class="auth-links" id="switchRow">Hesabın yoksa yöneticiden davet iste.</div>
-    </div>
-
-    <!-- Yeni şifre belirleme -->
-    <div id="authReset" style="display:none;">
-      <div class="auth-logo">🔑</div>
-      <h2 id="resetTitle">Yeni Şifre Belirle</h2>
-      <p class="auth-sub">En az 6 karakter</p>
-      <form id="resetForm" autocomplete="on">
-        <div class="form-group" style="margin-bottom:14px; text-align:left;">
-          <label for="newpassInput">Yeni şifre</label>
-          <input class="form-input" id="newpassInput" name="new-password" type="password" autocomplete="new-password" placeholder="••••••••">
-        </div>
-        <button class="btn btn-primary" id="resetSubmitBtn" type="submit">Şifreyi Kaydet</button>
-      </form>
-      <div class="auth-msg" id="resetMsg"></div>
-      <div class="auth-links"><a id="resetBack">← Geri</a></div>
     </div>
   </div>
 </div>
@@ -2445,14 +2428,12 @@ const GOOGLE_AUTH_REDIRECT_TO = (window.APP_CONFIG && window.APP_CONFIG.GOOGLE_A
   const overlay   = $("authOverlay");
   const setupView = $("authSetup");
   const formsView = $("authForms");
-  const resetView = $("authReset");
 
   const configured = SUPABASE_URL.indexOf("http") === 0 && SUPABASE_ANON_KEY.length > 20;
 
   if (!configured) {
     setupView.style.display = "block";
     formsView.style.display = "none";
-    resetView.style.display = "none";
     return; // uygulama giriş arkasında kilitli kalır
   }
 
@@ -2460,9 +2441,7 @@ const GOOGLE_AUTH_REDIRECT_TO = (window.APP_CONFIG && window.APP_CONFIG.GOOGLE_A
   window.__authClient = sb;
   window.__authIsAdmin = false;
 
-  let recovering = window.location.hash.indexOf("type=recovery") !== -1;
   let started = false;
-  let resetFromRecovery = false;
   let currentUser = null;
 
   function normalizeEmail(e){ return String(e || "").trim().toLowerCase(); }
@@ -2475,10 +2454,8 @@ const GOOGLE_AUTH_REDIRECT_TO = (window.APP_CONFIG && window.APP_CONFIG.GOOGLE_A
   }
 
   /* ---------- Görünüm yardımcıları ---------- */
-  function showForms(){ formsView.style.display="block"; resetView.style.display="none"; setupView.style.display="none"; }
-  function showReset(){ resetView.style.display="block"; formsView.style.display="none"; setupView.style.display="none"; }
+  function showForms(){ formsView.style.display="block"; setupView.style.display="none"; }
   function setMsg(t,type){ const m=$("authMsg"); m.textContent=t||""; m.className="auth-msg "+(type||""); }
-  function setResetMsg(t,type){ const m=$("resetMsg"); m.textContent=t||""; m.className="auth-msg "+(type||""); }
   function setInviteMsg(t,type){ const m=$("inviteMsg"); m.textContent=t||""; m.className="auth-msg "+(type||""); }
   function trErr(m){
     if(/provider is not enabled/i.test(m)) return "Google girişi etkin değil. Supabase > Auth > Providers bölümünden Google'ı açın.";
@@ -2507,40 +2484,8 @@ const GOOGLE_AUTH_REDIRECT_TO = (window.APP_CONFIG && window.APP_CONFIG.GOOGLE_A
     }catch(err){ setMsg(trErr(err.message),"err"); btn.disabled=false; }
   });
 
-  /* ---------- Yeni şifre belirleme ---------- */
-  function openReset(fromRecovery){
-    resetFromRecovery=fromRecovery;
-    $("resetTitle").textContent = fromRecovery ? "Yeni Şifre Belirle" : "Şifreyi Değiştir";
-    $("newpassInput").value=""; setResetMsg(""); $("resetSubmitBtn").disabled=false;
-    overlay.style.display="flex"; showReset();
-  }
-  $("resetForm").addEventListener("submit", async function(e){
-    e.preventDefault();
-    const p=$("newpassInput").value;
-    if(p.length<6){ setResetMsg("Şifre en az 6 karakter olmalı.","err"); return; }
-    $("resetSubmitBtn").disabled=true;
-    try{
-      const { error } = await sb.auth.updateUser({ password:p });
-      if(error) throw error;
-      if(resetFromRecovery){
-        recovering=false;
-        history.replaceState(null,"",window.location.pathname);
-        const { data } = await sb.auth.getUser();
-        enterApp(data.user);
-      } else {
-        setResetMsg("Şifren güncellendi! ✅","ok");
-        setTimeout(function(){ overlay.style.display="none"; }, 900);
-      }
-    }catch(err){ setResetMsg(trErr(err.message),"err"); $("resetSubmitBtn").disabled=false; }
-  });
-  $("resetBack").onclick=function(){
-    if(resetFromRecovery){ sb.auth.signOut(); }
-    else { overlay.style.display="none"; }   // oyuna geri dön
-  };
-
   /* ---------- Üst bar butonları ---------- */
   $("logoutBtnTB").onclick=function(){ sb.auth.signOut().then(function(){ location.reload(); }); };
-  $("changePwBtnTB").style.display = "none";
   $("progressBtn").onclick=function(){ openProgress(); };
   $("inviteBtnTB").onclick=function(){ openInviteModal(); };
   $("progressCloseBtn").onclick=function(){ $("progressModal").classList.remove("visible"); };
@@ -2708,7 +2653,6 @@ const GOOGLE_AUTH_REDIRECT_TO = (window.APP_CONFIG && window.APP_CONFIG.GOOGLE_A
   /* ---------- Uygulamaya giriş ---------- */
   function enterApp(user){
     currentUser=user;
-    recovering=false;
     overlay.style.display="none";
     const displayName=(user.user_metadata&&user.user_metadata.display_name)||(user.email?user.email.split("@")[0]:"Öğrenci");
     $("tbUserName").textContent="👋 "+displayName;
@@ -2726,7 +2670,6 @@ const GOOGLE_AUTH_REDIRECT_TO = (window.APP_CONFIG && window.APP_CONFIG.GOOGLE_A
   /* ---------- Oturum takibi ---------- */
   showForms(); renderGoogleAuth();
   sb.auth.onAuthStateChange(function(event, session){
-    if(event==="PASSWORD_RECOVERY"){ recovering=true; openReset(true); return; }
     if(event==="SIGNED_OUT" || !session){
       currentUser=null; started=false;
       $("authControls").style.display="none";
@@ -2735,7 +2678,6 @@ const GOOGLE_AUTH_REDIRECT_TO = (window.APP_CONFIG && window.APP_CONFIG.GOOGLE_A
       return;
     }
     if(session && session.user){
-      if(recovering){ openReset(true); return; }
       enterApp(session.user);
     }
   });
