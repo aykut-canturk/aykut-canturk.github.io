@@ -9,160 +9,103 @@
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#F0F7F4;
-    --card:#FFFFFF;
-    --ink:#1F4538;
-    --ink-soft:#6B8E82;
-    --leaf:#2E9E7C;
-    --leaf-dark:#247E63;
-    --sun:#FBBF24;
-    --petal:#F2789F;
-    --sky:#7CC4E6;
-    --success:#2E9E7C;
-    --tryagain:#F08A3C;
-    --shadow:0 10px 30px rgba(31,69,56,.12);
+    --bg:#F0F7F4; --card:#FFFFFF; --ink:#1F4538; --ink-soft:#6B8E82;
+    --leaf:#2E9E7C; --leaf-dark:#247E63; --sun:#FBBF24; --petal:#F2789F;
+    --sky:#7CC4E6; --success:#2E9E7C; --tryagain:#F08A3C;
+    --shadow:0 10px 30px rgba(31,69,56,.12); --line:#E1EEE8;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%}
   body{
-    font-family:"Nunito",system-ui,sans-serif;
-    color:var(--ink);
-    background:var(--bg);
+    font-family:"Nunito",system-ui,sans-serif;color:var(--ink);background:var(--bg);
     background-image:
       radial-gradient(circle at 85% -5%, rgba(251,191,36,.28), transparent 38%),
       radial-gradient(circle at 8% 105%, rgba(124,196,230,.22), transparent 42%);
-    min-height:100%;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    padding:20px;
+    min-height:100%;display:flex;flex-direction:column;align-items:center;padding:20px;
   }
+  .hidden{display:none !important}
 
-  /* ---- Header ---- */
   header{
-    width:100%;max-width:640px;
-    display:flex;align-items:center;justify-content:space-between;
-    gap:16px;margin:8px 0 4px;
+    width:100%;max-width:640px;display:flex;align-items:center;
+    justify-content:space-between;gap:16px;margin:8px 0 4px;
   }
   .brand{display:flex;align-items:center;gap:10px}
   .brand .logo{font-size:30px;line-height:1}
-  .brand h1{
-    font-family:"Fredoka",sans-serif;font-weight:600;
-    font-size:1.5rem;letter-spacing:.3px;
-  }
-  .garden{display:flex;gap:6px}
-  .garden .slot{
-    width:30px;height:30px;border-radius:50%;
-    display:grid;place-items:center;font-size:20px;
-    background:#E1EEE8;transition:transform .35s cubic-bezier(.34,1.56,.64,1);
-  }
-  .garden .slot.bloom{
-    background:#FFF3D6;transform:scale(1);
-    animation:pop .5s cubic-bezier(.34,1.56,.64,1);
-  }
+  .brand h1{font-family:"Fredoka",sans-serif;font-weight:600;font-size:1.5rem;letter-spacing:.3px}
+  .user-box{display:flex;align-items:center;gap:10px;font-weight:700;font-size:.95rem;color:var(--ink-soft)}
+  .logout{border:none;background:#EAF4F0;color:var(--leaf-dark);cursor:pointer;
+    font-family:"Nunito";font-weight:800;font-size:.85rem;padding:8px 14px;border-radius:999px}
+  .logout:hover{background:#DCEDE6}
+
+  main{width:100%;max-width:640px;background:var(--card);border-radius:32px;
+    box-shadow:var(--shadow);padding:40px 32px 36px;margin-top:18px;text-align:center}
+  .auth-card{max-width:440px;padding:36px 30px}
+  .eyebrow{font-weight:800;text-transform:uppercase;letter-spacing:2px;font-size:.8rem;color:var(--ink-soft)}
+
+  .auth-title{font-family:"Fredoka",sans-serif;font-weight:600;font-size:1.9rem;margin:6px 0 4px}
+  .auth-sub{color:var(--ink-soft);font-weight:600;margin-bottom:22px}
+  .field{text-align:left;margin-bottom:14px}
+  .field label{display:block;font-weight:800;font-size:.85rem;margin:0 0 6px 4px;color:var(--ink-soft)}
+  .field input{width:100%;font-family:"Nunito";font-weight:600;font-size:1.05rem;color:var(--ink);
+    padding:14px 16px;border:3px solid var(--line);border-radius:16px;background:#F7FBF9}
+  .field input:focus{outline:none;border-color:var(--leaf)}
+  .btn-primary{width:100%;font-family:"Fredoka",sans-serif;font-weight:600;font-size:1.25rem;
+    color:#fff;background:var(--leaf);border:none;border-radius:18px;padding:16px;
+    cursor:pointer;margin-top:6px;transition:background .15s, transform .1s}
+  .btn-primary:hover{background:var(--leaf-dark)}
+  .btn-primary:active{transform:scale(.98)}
+  .btn-primary:disabled{opacity:.6;cursor:default}
+  .switch{margin-top:18px;font-weight:700;color:var(--ink-soft);font-size:.95rem}
+  .switch a{color:var(--leaf-dark);cursor:pointer;text-decoration:underline}
+  .msg{margin-top:14px;font-weight:700;font-size:.95rem;min-height:20px}
+  .msg.err{color:var(--tryagain)} .msg.ok{color:var(--success)}
+
+  .setup{text-align:left;line-height:1.6;font-weight:600;color:var(--ink)}
+  .setup h2{font-family:"Fredoka";font-weight:600;font-size:1.5rem;margin-bottom:10px;text-align:center}
+  .setup code{background:#EAF4F0;padding:2px 7px;border-radius:6px;font-size:.9em}
+  .setup ol{margin:14px 0 0 20px} .setup li{margin-bottom:8px}
+
+  .garden{display:flex;gap:6px;justify-content:center;margin-bottom:8px}
+  .garden .slot{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;
+    font-size:20px;background:#E1EEE8;transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
+  .garden .slot.bloom{background:#FFF3D6;animation:pop .5s cubic-bezier(.34,1.56,.64,1)}
   @keyframes pop{0%{transform:scale(.3)}100%{transform:scale(1)}}
 
-  /* ---- Card ---- */
-  main{
-    width:100%;max-width:640px;
-    background:var(--card);
-    border-radius:32px;
-    box-shadow:var(--shadow);
-    padding:40px 32px 36px;
-    margin-top:18px;
-    text-align:center;
-  }
-  .eyebrow{
-    font-weight:800;text-transform:uppercase;letter-spacing:2px;
-    font-size:.8rem;color:var(--ink-soft);
-  }
+  .question{font-family:"Fredoka",sans-serif;font-weight:600;font-size:clamp(3rem,14vw,5rem);
+    line-height:1.1;margin:14px 0 6px;display:flex;align-items:center;justify-content:center;gap:.2em;flex-wrap:wrap}
+  .question .op{color:var(--leaf)} .question .eq{color:var(--ink-soft)} .question .q{color:var(--petal)}
 
-  .question{
-    font-family:"Fredoka",sans-serif;font-weight:600;
-    font-size:clamp(3rem,14vw,5rem);
-    line-height:1.1;margin:14px 0 6px;
-    color:var(--ink);
-    display:flex;align-items:center;justify-content:center;
-    gap:.2em;flex-wrap:wrap;
-  }
-  .question .op{color:var(--leaf)}
-  .question .eq{color:var(--ink-soft)}
-  .question .q{color:var(--petal)}
+  .listen{border:none;cursor:pointer;background:#EAF4F0;color:var(--leaf-dark);
+    font-family:"Nunito";font-weight:800;font-size:1rem;padding:10px 18px;border-radius:999px;
+    display:inline-flex;align-items:center;gap:8px;transition:background .15s, transform .1s}
+  .listen:hover{background:#DCEDE6} .listen:active{transform:scale(.96)}
 
-  .listen{
-    border:none;cursor:pointer;
-    background:#EAF4F0;color:var(--leaf-dark);
-    font-family:"Nunito";font-weight:800;font-size:1rem;
-    padding:10px 18px;border-radius:999px;
-    display:inline-flex;align-items:center;gap:8px;
-    transition:background .15s, transform .1s;
-  }
-  .listen:hover{background:#DCEDE6}
-  .listen:active{transform:scale(.96)}
-
-  /* ---- Answers ---- */
-  .answers{
-    display:grid;grid-template-columns:repeat(3,1fr);
-    gap:16px;margin:30px 0 8px;
-  }
-  .answer{
-    font-family:"Fredoka",sans-serif;font-weight:600;
-    font-size:clamp(2rem,9vw,3rem);
-    padding:24px 0;border-radius:24px;
-    border:3px solid #E1EEE8;background:#F7FBF9;
-    color:var(--ink);cursor:pointer;
-    transition:transform .12s, background .2s, border-color .2s, color .2s;
-    -webkit-tap-highlight-color:transparent;
-  }
+  .answers{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:30px 0 8px}
+  .answer{font-family:"Fredoka",sans-serif;font-weight:600;font-size:clamp(2rem,9vw,3rem);
+    padding:24px 0;border-radius:24px;border:3px solid var(--line);background:#F7FBF9;color:var(--ink);
+    cursor:pointer;transition:transform .12s, background .2s, border-color .2s, color .2s;-webkit-tap-highlight-color:transparent}
   .answer:hover{border-color:var(--leaf);transform:translateY(-3px)}
   .answer:active{transform:translateY(0) scale(.97)}
   .answer:focus-visible{outline:4px solid var(--sky);outline-offset:3px}
-  .answer.correct{
-    background:var(--success);border-color:var(--success);color:#fff;
-    animation:pop .45s cubic-bezier(.34,1.56,.64,1);
-  }
-  .answer.wrong{
-    background:#FFF1E6;border-color:var(--tryagain);color:var(--tryagain);
-    animation:shake .4s;
-  }
-  @keyframes shake{
-    0%,100%{transform:translateX(0)}
-    20%,60%{transform:translateX(-7px)}
-    40%,80%{transform:translateX(7px)}
-  }
+  .answer.correct{background:var(--success);border-color:var(--success);color:#fff;animation:pop .45s cubic-bezier(.34,1.56,.64,1)}
+  .answer.wrong{background:#FFF1E6;border-color:var(--tryagain);color:var(--tryagain);animation:shake .4s}
+  @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
 
-  /* ---- Feedback ---- */
-  .feedback{
-    min-height:44px;margin-top:18px;
-    font-family:"Fredoka",sans-serif;font-weight:500;
-    font-size:1.5rem;
-    display:flex;align-items:center;justify-content:center;gap:8px;
-    opacity:0;transform:translateY(6px);transition:opacity .25s, transform .25s;
-  }
+  .feedback{min-height:44px;margin-top:18px;font-family:"Fredoka",sans-serif;font-weight:500;
+    font-size:1.5rem;display:flex;align-items:center;justify-content:center;gap:8px;
+    opacity:0;transform:translateY(6px);transition:opacity .25s, transform .25s}
   .feedback.show{opacity:1;transform:translateY(0)}
-  .feedback.good{color:var(--success)}
-  .feedback.retry{color:var(--tryagain)}
+  .feedback.good{color:var(--success)} .feedback.retry{color:var(--tryagain)}
 
-  .banner{
-    margin-top:16px;background:#FFF3D6;color:#9A6B00;
-    border-radius:18px;padding:14px;font-weight:800;font-size:1.1rem;
-    display:none;
-  }
+  .banner{margin-top:16px;background:#FFF3D6;color:#9A6B00;border-radius:18px;padding:14px;
+    font-weight:800;font-size:1.1rem;display:none}
   .banner.show{display:block;animation:pop .5s cubic-bezier(.34,1.56,.64,1)}
 
-  footer{
-    margin:22px 0 6px;color:var(--ink-soft);
-    font-weight:700;font-size:.95rem;
-  }
+  footer{margin:22px 0 6px;color:var(--ink-soft);font-weight:700;font-size:.95rem}
   footer b{color:var(--leaf-dark)}
 
-  @media (prefers-reduced-motion: reduce){
-    *{animation:none !important;transition:none !important}
-  }
-  @media (max-width:420px){
-    main{padding:30px 18px 26px;border-radius:26px}
-    .answers{gap:12px}
-  }
+  @media (prefers-reduced-motion: reduce){*{animation:none !important;transition:none !important}}
+  @media (max-width:420px){main{padding:30px 18px 26px;border-radius:26px}.answers{gap:12px}}
 </style>
 </head>
 <body>
@@ -172,156 +115,268 @@
       <span class="logo" aria-hidden="true">🌼</span>
       <h1>Sayı Bahçesi</h1>
     </div>
-    <div class="garden" id="garden" aria-label="Topladığın çiçekler"></div>
+    <div class="user-box hidden" id="userBox">
+      <span id="userName"></span>
+      <button class="logout" id="logoutBtn" type="button">Çıkış</button>
+    </div>
   </header>
 
-  <main>
+  <main class="auth-card setup hidden" id="setupView">
+    <h2>🔧 Kurulum gerekli</h2>
+    <p>Giriş sisteminin çalışması için Supabase bilgilerinizi eklemeniz gerekiyor.</p>
+    <ol>
+      <li><b>supabase.com</b>'da ücretsiz bir proje açın.</li>
+      <li>Project Settings → API'den <code>Project URL</code> ve <code>anon key</code>'i kopyalayın.</li>
+      <li>Bu dosyadaki <code>SUPABASE_URL</code> ve <code>SUPABASE_ANON_KEY</code> satırlarına yapıştırın.</li>
+      <li>SQL Editor'de tabloyu ve güvenlik kurallarını oluşturun (kod dosyanın içinde yorum olarak var).</li>
+    </ol>
+  </main>
+
+  <main class="auth-card hidden" id="authView">
+    <p class="eyebrow" id="authEyebrow">Hoş geldin</p>
+    <h2 class="auth-title" id="authTitle">Giriş yap</h2>
+    <p class="auth-sub" id="authSub">Kaldığın yerden devam et</p>
+
+    <div class="field" id="nameField" style="display:none">
+      <label for="name">Adın</label>
+      <input id="name" type="text" autocomplete="given-name" placeholder="Örn: Ela">
+    </div>
+    <div class="field">
+      <label for="email">E-posta</label>
+      <input id="email" type="email" autocomplete="email" placeholder="ornek@eposta.com">
+    </div>
+    <div class="field">
+      <label for="password">Şifre</label>
+      <input id="password" type="password" autocomplete="current-password" placeholder="••••••••">
+    </div>
+
+    <button class="btn-primary" id="authBtn" type="button">Giriş yap</button>
+    <p class="msg" id="authMsg"></p>
+    <p class="switch" id="authSwitch">Hesabın yok mu? <a id="switchLink">Kayıt ol</a></p>
+  </main>
+
+  <main class="hidden" id="appView">
+    <div class="garden" id="garden" aria-label="Topladığın çiçekler"></div>
     <p class="eyebrow" id="eyebrow">1. Soru</p>
-
     <div class="question" id="question" aria-live="polite"></div>
-
-    <button class="listen" id="listenBtn" type="button">
-      <span aria-hidden="true">🔊</span> Dinle
-    </button>
-
+    <button class="listen" id="listenBtn" type="button"><span aria-hidden="true">🔊</span> Dinle</button>
     <div class="answers" id="answers" role="group" aria-label="Cevap seçenekleri"></div>
-
     <div class="feedback" id="feedback" aria-live="assertive"></div>
-
     <div class="banner" id="banner">🌷 Bahçen çiçeklerle doldu! Harikasın!</div>
   </main>
 
-  <footer>Doğru: <b id="score">0</b></footer>
+  <footer class="hidden" id="footer">Toplam doğru: <b id="score">0</b></footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-(function(){
-  const GARDEN_SIZE = 5;
-  const FLOWERS = ["🌸","🌷","🌻","🌼","🏵️"];
+/* ============================================================
+   1) BURAYA KENDİ SUPABASE BİLGİLERİNİZİ YAZIN
+   ============================================================ */
+const SUPABASE_URL      = "https://fnpzxhpryksjxduhejtx.supabase.co";   // örn: https://abcd1234.supabase.co
+const SUPABASE_ANON_KEY = "sb_publishable_GY7YWCQ7EHGbuyDYdbDXww_r60wNzPS";       // "anon public" anahtarı
 
-  let current = null;   // {a, b, op, answer, options}
-  let qIndex = 0;
-  let score = 0;
-  let bloom = 0;
-  let locked = false;
+/* ============================================================
+   2) SUPABASE SQL EDITOR'DE ÇALIŞTIRILACAK KOD
+   ------------------------------------------------------------
+   create table student_progress (
+     user_id uuid primary key references auth.users(id) on delete cascade,
+     display_name text,
+     total_correct  int not null default 0,
+     total_answered int not null default 0,
+     updated_at timestamptz not null default now()
+   );
 
-  const $ = id => document.getElementById(id);
-  const gardenEl  = $("garden");
-  const eyebrowEl = $("eyebrow");
-  const questionEl= $("question");
-  const answersEl = $("answers");
-  const feedbackEl= $("feedback");
-  const bannerEl  = $("banner");
-  const scoreEl   = $("score");
+   alter table student_progress enable row level security;
 
-  // Build the flower progress slots
-  for(let i=0;i<GARDEN_SIZE;i++){
-    const s = document.createElement("span");
-    s.className = "slot";
-    s.textContent = "·";
-    gardenEl.appendChild(s);
+   create policy "kendi kaydini gor"      on student_progress
+     for select using (auth.uid() = user_id);
+   create policy "kendi kaydini ekle"     on student_progress
+     for insert with check (auth.uid() = user_id);
+   create policy "kendi kaydini guncelle" on student_progress
+     for update using (auth.uid() = user_id);
+
+   -- Demoda kolaylık için: Authentication > Providers > Email
+   -- altından "Confirm email" kapatılabilir.
+   ============================================================ */
+
+const configured = SUPABASE_URL.startsWith("http") && SUPABASE_ANON_KEY.length > 20;
+const $ = id => document.getElementById(id);
+const views = { setup:$("setupView"), auth:$("authView"), app:$("appView"), footer:$("footer"), userBox:$("userBox") };
+
+function show(name){
+  views.setup.classList.toggle("hidden", name!=="setup");
+  views.auth.classList.toggle("hidden",  name!=="auth");
+  views.app.classList.toggle("hidden",   name!=="app");
+  views.footer.classList.toggle("hidden", name!=="app");
+  views.userBox.classList.toggle("hidden", name!=="app");
+}
+
+if(!configured){ show("setup"); }
+else{ startAuth(window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)); }
+
+function startAuth(sb){
+  let mode="login";
+  const els={ eyebrow:$("authEyebrow"), title:$("authTitle"), sub:$("authSub"),
+    nameField:$("nameField"), name:$("name"), email:$("email"), password:$("password"),
+    btn:$("authBtn"), msg:$("authMsg"), switchText:$("authSwitch") };
+
+  function renderMode(){
+    if(mode==="login"){
+      els.eyebrow.textContent="Hoş geldin"; els.title.textContent="Giriş yap";
+      els.sub.textContent="Kaldığın yerden devam et"; els.nameField.style.display="none";
+      els.btn.textContent="Giriş yap"; els.switchText.innerHTML='Hesabın yok mu? <a id="switchLink">Kayıt ol</a>';
+    } else {
+      els.eyebrow.textContent="Aramıza katıl"; els.title.textContent="Kayıt ol";
+      els.sub.textContent="Yeni bir bahçe başlat"; els.nameField.style.display="block";
+      els.btn.textContent="Kayıt ol"; els.switchText.innerHTML='Zaten hesabın var mı? <a id="switchLink">Giriş yap</a>';
+    }
+    els.msg.textContent=""; els.msg.className="msg";
+    $("switchLink").addEventListener("click", ()=>{ mode=(mode==="login")?"signup":"login"; renderMode(); });
   }
-  const slots = [...gardenEl.children];
+  function setMsg(t,type){ els.msg.textContent=t; els.msg.className="msg "+(type||""); }
+  function translateError(m){
+    if(/Invalid login/i.test(m)) return "E-posta veya şifre hatalı.";
+    if(/already registered/i.test(m)) return "Bu e-posta zaten kayıtlı.";
+    if(/at least 6/i.test(m)) return "Şifre en az 6 karakter olmalı.";
+    return m;
+  }
 
-  const rand = (min,max)=> Math.floor(Math.random()*(max-min+1))+min;
+  async function handleSubmit(){
+    const email=els.email.value.trim(), password=els.password.value;
+    if(!email || !password){ setMsg("E-posta ve şifre gerekli.","err"); return; }
+    els.btn.disabled=true;
+    try{
+      if(mode==="signup"){
+        const name=els.name.value.trim();
+        const { data, error } = await sb.auth.signUp({ email, password });
+        if(error) throw error;
+        if(name && data.user){ try{ await sb.auth.updateUser({ data:{ display_name:name } }); }catch(e){} }
+        if(!data.session){ setMsg("Kaydın alındı! E-postanı onaylayıp giriş yapabilirsin.","ok"); els.btn.disabled=false; return; }
+      } else {
+        const { error } = await sb.auth.signInWithPassword({ email, password });
+        if(error) throw error;
+      }
+    }catch(err){ setMsg(translateError(err.message),"err"); els.btn.disabled=false; }
+  }
+
+  els.btn.addEventListener("click", handleSubmit);
+  els.password.addEventListener("keydown", e=>{ if(e.key==="Enter") handleSubmit(); });
+  $("logoutBtn").addEventListener("click", ()=> sb.auth.signOut());
+
+  sb.auth.onAuthStateChange((_e, session)=>{
+    if(session && session.user){ enterApp(sb, session.user); }
+    else { renderMode(); show("auth"); }
+  });
+}
+
+async function enterApp(sb, user){
+  show("app");
+  const displayName = (user.user_metadata && user.user_metadata.display_name) ||
+                      (user.email ? user.email.split("@")[0] : "Öğrenci");
+  $("userName").textContent = "👋 " + displayName;
+
+  let totalCorrect=0, totalAnswered=0;
+  try{
+    const { data, error } = await sb.from("student_progress")
+      .select("total_correct,total_answered").eq("user_id", user.id).maybeSingle();
+    if(error) throw error;
+    if(data){ totalCorrect=data.total_correct||0; totalAnswered=data.total_answered||0; }
+    else{ await sb.from("student_progress").insert({ user_id:user.id, display_name:displayName, total_correct:0, total_answered:0 }); }
+  }catch(e){ console.warn("İlerleme yüklenemedi:", e.message); }
+
+  const GARDEN_SIZE=5, FLOWERS=["🌸","🌷","🌻","🌼","🏵️"];
+  let current=null, qIndex=0, locked=false, bloom=totalCorrect%GARDEN_SIZE;
+
+  const gardenEl=$("garden"), eyebrowEl=$("eyebrow"), questionEl=$("question"),
+        answersEl=$("answers"), feedbackEl=$("feedback"), bannerEl=$("banner"), scoreEl=$("score");
+
+  scoreEl.textContent=totalCorrect;
+  gardenEl.innerHTML="";
+  const slots=[];
+  for(let i=0;i<GARDEN_SIZE;i++){
+    const s=document.createElement("span"); s.className="slot"; s.textContent="·";
+    if(i<bloom){ s.textContent=FLOWERS[i%FLOWERS.length]; s.classList.add("bloom"); }
+    gardenEl.appendChild(s); slots.push(s);
+  }
+
+  const rand=(min,max)=>Math.floor(Math.random()*(max-min+1))+min;
+
+  async function saveProgress(){
+    try{
+      await sb.from("student_progress").upsert({
+        user_id:user.id, display_name:displayName,
+        total_correct:totalCorrect, total_answered:totalAnswered,
+        updated_at:new Date().toISOString()
+      });
+    }catch(e){ console.warn("Kaydedilemedi:", e.message); }
+  }
 
   function newQuestion(){
-    const op = Math.random() < 0.5 ? "+" : "−";
+    const op = Math.random()<0.5 ? "+" : "−";
     let a,b,answer;
-    if(op === "+"){
-      answer = rand(2,10);
-      a = rand(1, answer-1);
-      b = answer - a;
-    } else {
-      a = rand(2,10);
-      b = rand(1, a);
-      answer = a - b;
-    }
-    // three distinct, non-negative options
-    const opts = new Set([answer]);
-    while(opts.size < 3){
-      let d = answer + rand(-3,3);
-      if(d >= 0 && d !== answer) opts.add(d);
-    }
-    const options = [...opts].sort(()=> Math.random()-0.5);
-    current = {a,b,op,answer,options};
+    if(op==="+"){ answer=rand(2,10); a=rand(1,answer-1); b=answer-a; }
+    else{ a=rand(2,10); b=rand(1,a); answer=a-b; }
+    const opts=new Set([answer]);
+    while(opts.size<3){ let d=answer+rand(-3,3); if(d>=0 && d!==answer) opts.add(d); }
+    current={a,b,op,answer,options:[...opts].sort(()=>Math.random()-0.5)};
     render();
   }
 
   function render(){
-    locked = false;
-    qIndex++;
-    eyebrowEl.textContent = qIndex + ". Soru";
-    questionEl.innerHTML =
-      `<span>${current.a}</span>` +
-      `<span class="op">${current.op}</span>` +
-      `<span>${current.b}</span>` +
-      `<span class="eq">=</span>` +
-      `<span class="q">?</span>`;
-
-    answersEl.innerHTML = "";
+    locked=false; qIndex++;
+    eyebrowEl.textContent=qIndex+". Soru";
+    questionEl.innerHTML=`<span>${current.a}</span><span class="op">${current.op}</span>`+
+      `<span>${current.b}</span><span class="eq">=</span><span class="q">?</span>`;
+    answersEl.innerHTML="";
     current.options.forEach(val=>{
-      const btn = document.createElement("button");
-      btn.className = "answer";
-      btn.type = "button";
-      btn.textContent = val;
-      btn.addEventListener("click", ()=> choose(btn, val));
+      const btn=document.createElement("button");
+      btn.className="answer"; btn.type="button"; btn.textContent=val;
+      btn.addEventListener("click", ()=>choose(btn,val));
       answersEl.appendChild(btn);
     });
-
-    feedbackEl.className = "feedback";
-    feedbackEl.textContent = "";
+    feedbackEl.className="feedback"; feedbackEl.textContent="";
   }
 
-  function choose(btn, val){
+  function choose(btn,val){
     if(locked) return;
-    if(val === current.answer){
-      locked = true;
+    totalAnswered++;
+    if(val===current.answer){
+      locked=true;
       btn.classList.add("correct");
-      feedbackEl.textContent = "Harika! 🎉";
-      feedbackEl.className = "feedback show good";
-      score++; scoreEl.textContent = score;
-      growFlower();
-      setTimeout(newQuestion, 1300);
+      feedbackEl.textContent="Harika! 🎉"; feedbackEl.className="feedback show good";
+      totalCorrect++; scoreEl.textContent=totalCorrect;
+      growFlower(); saveProgress();
+      setTimeout(newQuestion,1300);
     } else {
-      btn.classList.add("wrong");
-      feedbackEl.textContent = "Tekrar dene 💪";
-      feedbackEl.className = "feedback show retry";
-      btn.disabled = true;
-      setTimeout(()=> btn.classList.remove("wrong"), 450);
+      btn.classList.add("wrong"); btn.disabled=true;
+      feedbackEl.textContent="Tekrar dene 💪"; feedbackEl.className="feedback show retry";
+      setTimeout(()=>btn.classList.remove("wrong"),450);
     }
   }
 
   function growFlower(){
-    const slot = slots[bloom];
-    slot.textContent = FLOWERS[bloom % FLOWERS.length];
-    slot.classList.add("bloom");
+    const slot=slots[bloom];
+    slot.textContent=FLOWERS[bloom%FLOWERS.length]; slot.classList.add("bloom");
     bloom++;
-    if(bloom >= GARDEN_SIZE){
+    if(bloom>=GARDEN_SIZE){
       bannerEl.classList.add("show");
-      setTimeout(()=>{
-        bannerEl.classList.remove("show");
-        bloom = 0;
-        slots.forEach(s=>{ s.textContent="·"; s.classList.remove("bloom"); });
-      }, 2200);
+      setTimeout(()=>{ bannerEl.classList.remove("show"); bloom=0;
+        slots.forEach(s=>{ s.textContent="·"; s.classList.remove("bloom"); }); },2200);
     }
   }
 
-  // Read the question aloud (Turkish), with graceful fallback
-  $("listenBtn").addEventListener("click", ()=>{
+  $("listenBtn").onclick=()=>{
     if(!("speechSynthesis" in window) || !current) return;
-    const opWord = current.op === "+" ? "artı" : "eksi";
-    const text = `${current.a} ${opWord} ${current.b} kaç eder?`;
+    const opWord = current.op==="+" ? "artı" : "eksi";
     try{
       window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      u.lang = "tr-TR";
-      u.rate = 0.85;
-      window.speechSynthesis.speak(u);
-    }catch(e){/* sessizce geç */}
-  });
+      const u=new SpeechSynthesisUtterance(`${current.a} ${opWord} ${current.b} kaç eder?`);
+      u.lang="tr-TR"; u.rate=0.85; window.speechSynthesis.speak(u);
+    }catch(e){}
+  };
 
   newQuestion();
-})();
+}
 </script>
 </body>
 </html>
