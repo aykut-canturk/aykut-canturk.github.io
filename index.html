@@ -2450,6 +2450,7 @@ const SUPABASE_ANON_KEY = (window.APP_CONFIG && window.APP_CONFIG.SUPABASE_ANON_
 const ADMIN_EMAILS      = (window.APP_CONFIG && Array.isArray(window.APP_CONFIG.ADMIN_EMAILS)) ? window.APP_CONFIG.ADMIN_EMAILS : [];
 const INVITE_FUNCTION_NAME = (window.APP_CONFIG && window.APP_CONFIG.INVITE_FUNCTION_NAME) || "invite-user";
 const LIST_USERS_FUNCTION_NAME = (window.APP_CONFIG && window.APP_CONFIG.LIST_USERS_FUNCTION_NAME) || "list-users";
+const RESET_PASSWORD_REDIRECT_TO = (window.APP_CONFIG && window.APP_CONFIG.RESET_PASSWORD_REDIRECT_TO) || (window.location.origin + window.location.pathname);
 
 (function () {
   'use strict';
@@ -2533,7 +2534,7 @@ const LIST_USERS_FUNCTION_NAME = (window.APP_CONFIG && window.APP_CONFIG.LIST_US
     btn.disabled=true;
     try{
       if(mode==="forgot"){
-        const redirectTo = window.location.origin + window.location.pathname;
+        const redirectTo = RESET_PASSWORD_REDIRECT_TO;
         const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo });
         if(error) throw error;
         setMsg("Sıfırlama bağlantısı e-postana gönderildi. 📬","ok"); btn.disabled=false; return;
