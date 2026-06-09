@@ -817,7 +817,6 @@
     <div id="authControls" style="display:none; align-items:center; gap:8px;">
       <span id="tbUserName" style="color:#fff; font-weight:700; font-size:14px; text-shadow:1px 1px 0 var(--lego-black); max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></span>
       <button class="btn btn-icon" id="progressBtn" aria-label="Gelişimim" title="Gelişimim">📈</button>
-      <button class="btn btn-icon" id="inviteBtnTB" aria-label="Kullanıcı davet et" title="Kullanıcı davet et" style="display:none;">✉️</button>
       <button class="btn btn-icon" id="logoutBtnTB" aria-label="Çıkış" title="Çıkış">🚪</button>
     </div>
   </div>
@@ -826,23 +825,6 @@
 <main class="main-content">
   <div class="content-wrapper" id="contentWrapper"></div>
 </main>
-
-<!-- PIN MODAL -->
-<div class="modal-overlay" id="pinModal">
-  <div class="modal" style="max-width: 400px;">
-    <div class="pin-prompt">
-      <h2>🔐 Yönetici Girişi</h2>
-      <p>Lütfen yönetici şifresini giriniz</p>
-      <input type="password" class="pin-input" id="pinInput" maxlength="4" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
-      <div class="pin-error" id="pinError"></div>
-      <div style="display: flex; gap: 12px; justify-content: center;">
-        <button class="btn btn-secondary" id="pinCancelBtn">İptal</button>
-        <button class="btn btn-primary" id="pinSubmitBtn">Giriş</button>
-      </div>
-      <p style="margin-top: 16px; font-size: 12px;">Varsayılan şifre: <strong>1234</strong></p>
-    </div>
-  </div>
-</div>
 
 <!-- ADMIN MODAL -->
 <div class="modal-overlay" id="adminModal">
@@ -856,7 +838,7 @@
         <button class="tab active" data-tab="groups">📁 Gruplar (<span id="groupCountBadge">0</span>)</button>
         <button class="tab" data-tab="add">➕ Soru Ekle</button>
         <button class="tab" data-tab="list">📋 Sorular (<span id="questionCountBadge">0</span>)</button>
-        <button class="tab" data-tab="users">👥 Kullanıcılar</button>
+        <button class="tab" data-tab="users">👥 İzinli Kullanıcılar</button>
         <button class="tab" data-tab="data">💾 Veri</button>
         <button class="tab" data-tab="settings">🔧 Ayarlar</button>
       </div>
@@ -952,10 +934,19 @@
 
       <!-- KULLANICILAR -->
       <div class="tab-content" id="tab-users">
+        <div class="form-group" style="background: var(--surface-variant); padding: 12px; border-radius: var(--radius-md); margin-bottom: 12px;">
+          <label for="allowedEmailInput">İzinli E-posta Ekle</label>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <input class="form-input" id="allowedEmailInput" type="email" placeholder="ogrenci@ornek.com" style="flex:1; min-width: 220px;">
+            <button class="btn btn-primary" id="addAllowedUserBtn" style="padding: 8px 14px; font-size: 13px;">Ekle</button>
+          </div>
+          <div class="hint">Listeye eklenen kullanıcılar Google ile giriş yapabilir.</div>
+        </div>
         <div class="filter-bar" style="justify-content: space-between;">
-          <label>Supabase kullanıcı listesi</label>
+          <label>İzinli kullanıcı listesi</label>
           <button class="btn btn-secondary" id="refreshUsersBtn" style="padding: 8px 14px; font-size: 13px;">Yenile</button>
         </div>
+        <div id="usersMsg" class="auth-msg"></div>
         <div id="usersList" class="item-list"></div>
       </div>
 
@@ -989,17 +980,11 @@
 
       <!-- AYARLAR -->
       <div class="tab-content" id="tab-settings">
-        <div class="form-group">
-          <label for="pinInputSetting">Yönetici Şifresi (4 haneli)</label>
-          <input type="text" class="form-input" id="pinInputSetting" maxlength="4" inputmode="numeric" pattern="[0-9]{4}">
-          <div class="hint">Sadece rakam, 4 hane.</div>
-        </div>
-        <button class="btn btn-primary" id="savePinBtn">Şifreyi Kaydet</button>
-        <hr style="margin: 24px 0; border: none; border-top: 1px solid var(--outline-variant);">
         <div style="background: var(--surface-variant); padding: 16px; border-radius: var(--radius-md); font-size: 14px; color: var(--on-surface-variant);">
           <strong>Bilgi:</strong>
           <ul style="margin: 8px 0 0 20px; line-height: 1.6;">
-            <li>Veriler tarayıcının LocalStorage'ında saklanır</li>
+            <li>Yönetim erişimi Google oturumu + admin e-posta listesi ile sağlanır</li>
+            <li>İzinli kullanıcılar sekmesinden giriş izni yönetilir</li>
             <li>Tarayıcı verileri silinirse her şey kaybolur</li>
             <li>Yedekleme için "Dışa Aktar" özelliğini kullanın</li>
           </ul>
@@ -1082,32 +1067,6 @@
   </div>
 </div>
 
-<!-- ===================== DAVET MODALI (YALNIZCA ADMIN) ===================== -->
-<div class="modal-overlay" id="inviteModal">
-  <div class="modal" style="max-width:460px;">
-    <div class="modal-header">
-      <h2>✉️ Kullanıcı Davet Et</h2>
-      <button class="btn btn-icon" id="inviteCloseBtn" aria-label="Kapat">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-group">
-        <label for="inviteEmailInput">E-posta</label>
-        <input class="form-input" id="inviteEmailInput" type="email" placeholder="ogrenci@ornek.com" autocomplete="off">
-      </div>
-      <div class="form-group">
-        <label for="inviteNameInput">Ad Soyad (opsiyonel)</label>
-        <input class="form-input" id="inviteNameInput" type="text" placeholder="Örn: Ayşe Yılmaz" autocomplete="off">
-      </div>
-      <p style="font-size:13px; color:var(--on-surface-variant); margin-bottom:12px;">Davet e-postası gönderilir. Kullanıcı kayıt bağlantısıyla hesabını tamamlar.</p>
-      <div id="inviteMsg" class="auth-msg"></div>
-      <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:8px;">
-        <button class="btn btn-secondary" id="inviteCancelBtn" type="button">İptal</button>
-        <button class="btn btn-primary" id="inviteSubmitBtn" type="button">Davet Gönder</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
@@ -1117,11 +1076,9 @@
   const STORAGE_KEYS = {
     QUESTIONS: 'matematik_sorulari',
     GROUPS: 'matematik_gruplari',
-    PIN: 'matematik_pin',
     ASKED: 'matematik_sorulan_idler',
     SOUND: 'matematik_ses_acik'
   };
-  const DEFAULT_PIN = '1234';
   const SESSION_LIMIT = 10;
 
   const COLOR_PALETTE = [
@@ -1192,8 +1149,6 @@
     saveGroups(g) { return this._save(STORAGE_KEYS.GROUPS, g); },
     loadAsked() { return this._load(STORAGE_KEYS.ASKED, {}); },
     saveAsked(a) { return this._save(STORAGE_KEYS.ASKED, a); },
-    loadPin() { return localStorage.getItem(STORAGE_KEYS.PIN) || DEFAULT_PIN; },
-    savePin(pin) { localStorage.setItem(STORAGE_KEYS.PIN, pin); },
     loadSound() {
       const val = localStorage.getItem(STORAGE_KEYS.SOUND);
       return val === null ? true : val === 'true';
@@ -1641,51 +1596,6 @@
     }
   };
 
-  const PinModal = {
-    modal: null,
-    input: null,
-    error: null,
-    onSuccess: null,
-    init() {
-      this.modal = document.getElementById('pinModal');
-      this.input = document.getElementById('pinInput');
-      this.error = document.getElementById('pinError');
-
-      document.getElementById('pinSubmitBtn').addEventListener('click', () => this.submit());
-      document.getElementById('pinCancelBtn').addEventListener('click', () => this.close());
-      this.input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') this.submit();
-      });
-      this.modal.addEventListener('click', (e) => {
-        if (e.target === this.modal) this.close();
-      });
-    },
-    open(callback) {
-      this.onSuccess = callback;
-      this.input.value = '';
-      this.error.textContent = '';
-      this.modal.classList.add('visible');
-      setTimeout(() => this.input.focus(), 100);
-    },
-    close() {
-      this.modal.classList.remove('visible');
-      this.onSuccess = null;
-    },
-    submit() {
-      const entered = this.input.value.trim();
-      const correct = Storage.loadPin();
-      if (entered === correct) {
-        const callback = this.onSuccess;
-        this.close();
-        if (callback) callback();
-      } else {
-        this.error.textContent = 'Hatalı şifre. Tekrar deneyin.';
-        this.input.value = '';
-        this.input.focus();
-      }
-    }
-  };
-
   const AdminModal = {
     modal: null,
     init() {
@@ -1706,7 +1616,6 @@
       this.initFilter();
       this.initUsersTab();
       this.initDataTab();
-      this.initSettingsTab();
     },
     requestOpen() {
       if (window.__authIsAdmin === true) {
@@ -1739,7 +1648,6 @@
       this.refreshGroupsList();
       this.refreshGroupSelects();
       this.refreshQuestionsList();
-      this.refreshSettings();
       this.renderEmojiPicker();
       this.renderColorPicker();
       document.getElementById('groupCountBadge').textContent = state.groups.length;
@@ -1748,46 +1656,100 @@
 
     initUsersTab() {
       document.getElementById('refreshUsersBtn').addEventListener('click', () => this.refreshUsersList());
+      document.getElementById('addAllowedUserBtn').addEventListener('click', () => this.addAllowedUser());
+      document.getElementById('allowedEmailInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); this.addAllowedUser(); }
+      });
+    },
+    setUsersMsg(msg, type) {
+      const el = document.getElementById('usersMsg');
+      el.textContent = msg || '';
+      el.className = 'auth-msg ' + (type || '');
+    },
+    async callAllowlistFunction(name, body) {
+      if (!window.__authClient || !window.__authClient.functions) {
+        throw new Error('Oturum istemcisi hazır değil');
+      }
+      const res = await window.__authClient.functions.invoke(name, { body: body || {} });
+      if (!res.error) return res.data || {};
+
+      let detailed = res.error.message || 'İşlem başarısız';
+      try {
+        if (res.error.context && typeof res.error.context.json === 'function') {
+          const payload = await res.error.context.json();
+          if (payload && payload.error) detailed = payload.error;
+        }
+      } catch (_) {}
+      throw new Error(detailed);
+    },
+    async addAllowedUser() {
+      const emailInput = document.getElementById('allowedEmailInput');
+      const email = String(emailInput.value || '').trim().toLowerCase();
+      if (!email) {
+        this.setUsersMsg('E-posta gerekli.', 'err');
+        return;
+      }
+
+      const fnName = (window.APP_CONFIG && window.APP_CONFIG.ALLOWLIST_ADD_FUNCTION_NAME) || 'add-allowed-user';
+      try {
+        await this.callAllowlistFunction(fnName, { email });
+        emailInput.value = '';
+        this.setUsersMsg('Kullanıcı izin listesine eklendi ✓', 'ok');
+        this.refreshUsersList();
+      } catch (err) {
+        this.setUsersMsg((err && err.message) || 'Ekleme başarısız.', 'err');
+      }
+    },
+    async removeAllowedUser(email) {
+      const fnName = (window.APP_CONFIG && window.APP_CONFIG.ALLOWLIST_DELETE_FUNCTION_NAME) || 'delete-allowed-user';
+      try {
+        await this.callAllowlistFunction(fnName, { email });
+        this.setUsersMsg('Kullanıcı izin listesinden çıkarıldı.', 'ok');
+        this.refreshUsersList();
+      } catch (err) {
+        this.setUsersMsg((err && err.message) || 'Silme başarısız.', 'err');
+      }
     },
     async refreshUsersList() {
       const list = document.getElementById('usersList');
       list.innerHTML = '<div style="text-align:center; padding:24px; color: var(--on-surface-variant);">Yükleniyor…</div>';
 
       try {
-        if (!window.__authClient || !window.__authClient.functions) {
-          throw new Error('Oturum istemcisi hazır değil');
-        }
-
-        const fnName = (window.APP_CONFIG && window.APP_CONFIG.LIST_USERS_FUNCTION_NAME) || 'list-users';
-        const res = await window.__authClient.functions.invoke(fnName, { body: {} });
-        if (res.error) throw res.error;
-
-        const payload = res.data || {};
-        const users = Array.isArray(payload.users) ? payload.users : (Array.isArray(payload) ? payload : []);
+        const fnName = (window.APP_CONFIG && window.APP_CONFIG.ALLOWLIST_LIST_FUNCTION_NAME) || 'list-allowed-users';
+        const payload = await this.callAllowlistFunction(fnName, {});
+        const users = Array.isArray(payload.users) ? payload.users : [];
 
         if (!users.length) {
-          list.innerHTML = '<div style="text-align:center; padding:24px; color: var(--on-surface-variant);">Kullanıcı bulunamadı.</div>';
+          list.innerHTML = '<div style="text-align:center; padding:24px; color: var(--on-surface-variant);">İzinli kullanıcı yok.</div>';
           return;
         }
 
         list.innerHTML = users.map(u => {
           const email = Util.escapeHtml(u.email || '—');
-          const fullName = Util.escapeHtml((u.user_metadata && u.user_metadata.display_name) || u.full_name || '—');
           const createdAt = Util.escapeHtml((u.created_at || '').slice(0, 10) || '—');
-          const lastSignIn = Util.escapeHtml((u.last_sign_in_at || '').slice(0, 10) || '—');
-          const status = u.banned_until ? 'Askıda' : 'Aktif';
-
           return '<div class="list-item">' +
-            '<div class="thumb">👤</div>' +
+            '<div class="thumb">🔐</div>' +
             '<div class="info">' +
-              '<div class="item-title">' + fullName + '</div>' +
-              '<div class="item-subtitle">' + email + '</div>' +
-              '<div class="item-subtitle" style="margin-top:4px;">Durum: <strong>' + status + '</strong> · Kayıt: ' + createdAt + ' · Son giriş: ' + lastSignIn + '</div>' +
+              '<div class="item-title">' + email + '</div>' +
+              '<div class="item-subtitle">İzin verildi: ' + createdAt + '</div>' +
+            '</div>' +
+            '<div class="actions">' +
+              '<button class="icon-action-btn delete remove-allowed-user-btn" data-email="' + email + '" title="Listeden çıkar">🗑️</button>' +
             '</div>' +
           '</div>';
         }).join('');
+
+        list.querySelectorAll('.remove-allowed-user-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const email = btn.dataset.email;
+            if (!email) return;
+            if (confirm('"' + email + '" izin listesinden çıkarılsın mı?')) {
+              this.removeAllowedUser(email);
+            }
+          });
+        });
       } catch (err) {
-        list.innerHTML = '<div style="text-align:center; padding:24px; color: var(--lego-red); font-weight:700;">Kullanıcı listesi alınamadı: ' + Util.escapeHtml((err && err.message) || 'Hata') + '</div>';
+        list.innerHTML = '<div style="text-align:center; padding:24px; color: var(--lego-red); font-weight:700;">İzinli kullanıcı listesi alınamadı: ' + Util.escapeHtml((err && err.message) || 'Hata') + '</div>';
       }
     },
 
@@ -2248,20 +2210,7 @@
       Toast.show('Tüm veriler silindi', 'success');
     },
 
-    initSettingsTab() {
-      document.getElementById('savePinBtn').addEventListener('click', () => {
-        const newPin = document.getElementById('pinInputSetting').value.trim();
-        if (!/^\d{4}$/.test(newPin)) {
-          Toast.show('Şifre 4 haneli rakam olmalı', 'error');
-          return;
-        }
-        Storage.savePin(newPin);
-        Toast.show('Şifre güncellendi ✓', 'success');
-      });
-    },
-    refreshSettings() {
-      document.getElementById('pinInputSetting').value = Storage.loadPin();
-    }
+    initSettingsTab() {}
   };
 
   function init() {
@@ -2276,7 +2225,6 @@
     GroupsScreen.init();
     QuestionScreen.init();
     ResultsScreen.init();
-    PinModal.init();
     AdminModal.init();
 
     document.getElementById('settingsBtn').addEventListener('click', () => {
@@ -2410,16 +2358,15 @@
       sitenizin adresini "Redirect URLs" olarak ekleyin
       (örn. https://kullaniciadi.github.io/repo-adi/).
 
-  5) Admin işlemleri için Supabase Edge Function'lar oluşturun:
-    - invite-user: service_role ile auth.admin.inviteUserByEmail çağırmalı
-    - list-users: service_role ile auth.admin.listUsers çağırmalı
+  5) Admin işlemleri için allowlist Edge Function'larını deploy edin:
+    - list-allowed-users
+    - add-allowed-user
+    - delete-allowed-user
    ===================================================================== */
 
 const SUPABASE_URL      = (window.APP_CONFIG && window.APP_CONFIG.SUPABASE_URL)      || "BURAYA_SUPABASE_URL";   // config.js'ten okunur
 const SUPABASE_ANON_KEY = (window.APP_CONFIG && window.APP_CONFIG.SUPABASE_ANON_KEY) || "BURAYA_ANON_KEY";       // config.js'ten okunur
 const ADMIN_EMAILS      = (window.APP_CONFIG && Array.isArray(window.APP_CONFIG.ADMIN_EMAILS)) ? window.APP_CONFIG.ADMIN_EMAILS : [];
-const INVITE_FUNCTION_NAME = (window.APP_CONFIG && window.APP_CONFIG.INVITE_FUNCTION_NAME) || "invite-user";
-const LIST_USERS_FUNCTION_NAME = (window.APP_CONFIG && window.APP_CONFIG.LIST_USERS_FUNCTION_NAME) || "list-users";
 const GOOGLE_AUTH_REDIRECT_TO = (window.APP_CONFIG && window.APP_CONFIG.GOOGLE_AUTH_REDIRECT_TO) || (window.location.origin + window.location.pathname);
 
 (function () {
@@ -2449,14 +2396,26 @@ const GOOGLE_AUTH_REDIRECT_TO = (window.APP_CONFIG && window.APP_CONFIG.GOOGLE_A
   function syncAdminVisibility(user){
     const isAdmin = !!(user && isAdminUser(user.email));
     window.__authIsAdmin = isAdmin;
-    $("inviteBtnTB").style.display = isAdmin ? "inline-flex" : "none";
     $("settingsBtn").style.display = isAdmin ? "inline-flex" : "none";
+  }
+  async function isUserAllowedByAllowlist(email){
+    const normalized = normalizeEmail(email);
+    if (!normalized) return false;
+    if (isAdminUser(normalized)) return true;
+
+    const { data, error } = await sb
+      .from('allowed_users')
+      .select('email')
+      .eq('email', normalized)
+      .limit(1);
+
+    if (error) throw error;
+    return Array.isArray(data) && data.length > 0;
   }
 
   /* ---------- Görünüm yardımcıları ---------- */
   function showForms(){ formsView.style.display="block"; setupView.style.display="none"; }
   function setMsg(t,type){ const m=$("authMsg"); m.textContent=t||""; m.className="auth-msg "+(type||""); }
-  function setInviteMsg(t,type){ const m=$("inviteMsg"); m.textContent=t||""; m.className="auth-msg "+(type||""); }
   function trErr(m){
     if(/provider is not enabled/i.test(m)) return "Google girişi etkin değil. Supabase > Auth > Providers bölümünden Google'ı açın.";
     if(/popup|redirect|oauth/i.test(m)) return "Google girişinde yönlendirme hatası oluştu. Redirect URL ayarlarını kontrol edin.";
@@ -2487,61 +2446,8 @@ const GOOGLE_AUTH_REDIRECT_TO = (window.APP_CONFIG && window.APP_CONFIG.GOOGLE_A
   /* ---------- Üst bar butonları ---------- */
   $("logoutBtnTB").onclick=function(){ sb.auth.signOut().then(function(){ location.reload(); }); };
   $("progressBtn").onclick=function(){ openProgress(); };
-  $("inviteBtnTB").onclick=function(){ openInviteModal(); };
   $("progressCloseBtn").onclick=function(){ $("progressModal").classList.remove("visible"); };
   $("progressModal").addEventListener("click", function(e){ if(e.target===$("progressModal")) $("progressModal").classList.remove("visible"); });
-  $("inviteCloseBtn").onclick=function(){ closeInviteModal(); };
-  $("inviteCancelBtn").onclick=function(){ closeInviteModal(); };
-  $("inviteSubmitBtn").onclick=function(){ sendInvite(); };
-  $("inviteModal").addEventListener("click", function(e){ if(e.target===$("inviteModal")) closeInviteModal(); });
-
-  function openInviteModal(){
-    if(!currentUser || !isAdminUser(currentUser.email)) return;
-    $("inviteEmailInput").value = "";
-    $("inviteNameInput").value = "";
-    setInviteMsg("");
-    $("inviteModal").classList.add("visible");
-    setTimeout(function(){ $("inviteEmailInput").focus(); }, 50);
-  }
-
-  function closeInviteModal(){
-    $("inviteModal").classList.remove("visible");
-    setInviteMsg("");
-    $("inviteSubmitBtn").disabled = false;
-  }
-
-  async function sendInvite(){
-    if(!currentUser || !isAdminUser(currentUser.email)){
-      setInviteMsg("Bu işlem için admin yetkisi gerekli.", "err");
-      return;
-    }
-    const email = normalizeEmail($("inviteEmailInput").value);
-    const fullName = String($("inviteNameInput").value || "").trim();
-    if(!email){ setInviteMsg("E-posta gerekli.", "err"); return; }
-
-    $("inviteSubmitBtn").disabled = true;
-    setInviteMsg("Davet gönderiliyor…", "");
-    try{
-      const payload = { email: email, fullName: fullName };
-      const res = await sb.functions.invoke(INVITE_FUNCTION_NAME, { body: payload });
-      if (res.error) {
-        let detailedError = res.error.message || "Davet gönderilemedi.";
-        try {
-          if (res.error.context && typeof res.error.context.json === 'function') {
-            const errBody = await res.error.context.json();
-            if (errBody && errBody.error) detailedError = errBody.error;
-          }
-        } catch (_) {}
-        throw new Error(detailedError);
-      }
-      setInviteMsg("Davet gönderildi ✓", "ok");
-      Toast.show("Davet e-postası gönderildi", "success");
-      setTimeout(function(){ closeInviteModal(); }, 700);
-    }catch(err){
-      setInviteMsg(trErr((err && err.message) || "Davet gönderilemedi."), "err");
-      $("inviteSubmitBtn").disabled = false;
-    }
-  }
 
   /* ---------- Cevap kaydı (uygulamadan çağrılır) ---------- */
   window.__progressRecord = function(groupName, isCorrect){
@@ -2678,7 +2584,23 @@ const GOOGLE_AUTH_REDIRECT_TO = (window.APP_CONFIG && window.APP_CONFIG.GOOGLE_A
       return;
     }
     if(session && session.user){
-      enterApp(session.user);
+      (async function(){
+        try {
+          const allowed = await isUserAllowedByAllowlist(session.user.email);
+          if (!allowed) {
+            await sb.auth.signOut();
+            setMsg('Bu hesap için giriş izni yok. Lütfen yöneticiden izin isteyin.', 'err');
+            overlay.style.display='flex';
+            renderGoogleAuth();
+            showForms();
+            return;
+          }
+          enterApp(session.user);
+        } catch (err) {
+          setMsg('Erişim kontrolü yapılamadı: ' + ((err && err.message) || 'Hata'), 'err');
+          await sb.auth.signOut();
+        }
+      })();
     }
   });
 })();

@@ -20,8 +20,8 @@ window.APP_CONFIG = {
   RESET_PASSWORD_REDIRECT_TO: "https://aykut-canturk.github.io/",
   // Google OAuth dönüş adresi
   GOOGLE_AUTH_REDIRECT_TO: "https://aykut-canturk.github.io/",
-  // Supabase Edge Function adı (auth admin invite çağrısını server-side yapmalı)
-  INVITE_FUNCTION_NAME: "invite-user",
-  // Supabase Edge Function adı (admin kullanıcı listesini döndürmeli)
-  LIST_USERS_FUNCTION_NAME: "list-users"
+  // İzinli kullanıcı listesi edge function adları
+  ALLOWLIST_LIST_FUNCTION_NAME: "list-allowed-users",
+  ALLOWLIST_ADD_FUNCTION_NAME: "add-allowed-user",
+  ALLOWLIST_DELETE_FUNCTION_NAME: "delete-allowed-user"
 };

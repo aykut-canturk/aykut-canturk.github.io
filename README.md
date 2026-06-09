@@ -3,15 +3,16 @@
 ## Mimari Özeti
 
 - Giriş modeli: yalnızca Google OAuth
-- Kullanıcı modeli: admin davet eder, kullanıcı davet sonrası Google ile giriş yapar
+- Kullanıcı modeli: admin izinli kullanıcı listesine e-posta ekler, kullanıcı Google ile giriş yapar
 - Admin yetkisi: `ADMIN_EMAILS` allowlist
 - Frontend: statik (GitHub Pages)
 - Admin işlemleri: Supabase Edge Functions
 
 Edge Functions:
 
-- `supabase/functions/invite-user/index.ts`
-- `supabase/functions/list-users/index.ts`
+- `supabase/functions/list-allowed-users/index.ts`
+- `supabase/functions/add-allowed-user/index.ts`
+- `supabase/functions/delete-allowed-user/index.ts`
 - `supabase/functions/_shared/admin-auth.ts`
 
 ## Kurulum
@@ -29,15 +30,15 @@ supabase link --project-ref YOUR_PROJECT_REF
 ```bash
 supabase secrets set \
   SERVICE_ROLE_KEY="YOUR_SERVICE_ROLE_KEY" \
-  ADMIN_EMAILS="admin1@example.com,admin2@example.com" \
-  INVITE_REDIRECT_TO="https://YOUR_GITHUB_USERNAME.github.io/"
+  ADMIN_EMAILS="admin1@example.com,admin2@example.com"
 ```
 
 1. Deploy
 
 ```bash
-supabase functions deploy invite-user
-supabase functions deploy list-users
+supabase functions deploy list-allowed-users
+supabase functions deploy add-allowed-user
+supabase functions deploy delete-allowed-user
 ```
 
 ## Supabase Auth Ayarları
@@ -71,14 +72,15 @@ window.APP_CONFIG = {
   SUPABASE_ANON_KEY: "YOUR_ANON_KEY",
   ADMIN_EMAILS: ["admin1@example.com"],
   GOOGLE_AUTH_REDIRECT_TO: "https://YOUR_GITHUB_USERNAME.github.io/",
-  INVITE_FUNCTION_NAME: "invite-user",
-  LIST_USERS_FUNCTION_NAME: "list-users"
+  ALLOWLIST_LIST_FUNCTION_NAME: "list-allowed-users",
+  ALLOWLIST_ADD_FUNCTION_NAME: "add-allowed-user",
+  ALLOWLIST_DELETE_FUNCTION_NAME: "delete-allowed-user"
 };
 ```
 
 ## Hızlı Kontrol
 
-1. Admin Google ile giriş yapar, `⚙️` ve `✉️` görür.
-2. Admin davet gönderir.
-3. Davet edilen kullanıcı Google ile giriş yapar.
-4. Admin olmayan kullanıcı `⚙️` ve `✉️` görmez.
+1. Admin Google ile giriş yapar, `⚙️` görür.
+2. Admin İzinli Kullanıcılar sekmesinden e-posta ekler.
+3. İzinli kullanıcı Google ile giriş yapar.
+4. Listede olmayan kullanıcı girişten sonra otomatik çıkış alır.
