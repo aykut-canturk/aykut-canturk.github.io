@@ -2230,17 +2230,72 @@
     StatsBar.update();
   }
 
+  /* ===== BULUT SENKRONU (gruplar + sorular) ===== */
+  function __notifyErr(msg){ try { Toast.show(msg, 'error'); } catch (e) { console.warn(msg); } }
+  const Cloud = {
+    sb: null,
+    groups: [],
+    questions: [],
+    setClient(sb){ this.sb = sb; },
+    _gFromDb(r){ return { id:r.id, name:r.name, emoji:r.emoji, color:r.color, createdAt: r.created_at ? Date.parse(r.created_at) : Date.now() }; },
+    _qFromDb(r){ return { id:r.id, groupId:r.group_id, text:r.text, options:r.options, correctIndex:r.correct_index, image:r.image || null, createdAt: r.created_at ? Date.parse(r.created_at) : Date.now() }; },
+    _gToDb(g){ return { id:g.id, name:g.name, emoji:g.emoji, color:g.color, created_at: g.createdAt ? new Date(g.createdAt).toISOString() : new Date().toISOString() }; },
+    _qToDb(q){ return { id:q.id, group_id:q.groupId, text:q.text, options:q.options, correct_index:q.correctIndex, image:q.image || null, created_at: q.createdAt ? new Date(q.createdAt).toISOString() : new Date().toISOString() }; },
+    async preload(){
+      if(!this.sb) return;
+      try{
+        const gr = await this.sb.from('quiz_groups').select('*').order('created_at', { ascending:true });
+        if(gr.error) throw gr.error;
+        this.groups = (gr.data || []).map(this._gFromDb);
+        const qr = await this.sb.from('quiz_questions').select('*').order('created_at', { ascending:true });
+        if(qr.error) throw qr.error;
+        this.questions = (qr.data || []).map(this._qFromDb);
+      }catch(e){ __notifyErr('Bulut verisi alınamadı: ' + e.message); }
+    },
+    async syncGroups(newArr){
+      if(!this.sb){ this.groups = newArr.map(g => Object.assign({}, g)); return; }
+      const newIds = new Set(newArr.map(g => g.id));
+      const dels = this.groups.map(g => g.id).filter(id => !newIds.has(id));
+      this.groups = newArr.map(g => Object.assign({}, g));
+      try{
+        if(newArr.length){ const r = await this.sb.from('quiz_groups').upsert(newArr.map(this._gToDb)); if(r.error) throw r.error; }
+        if(dels.length){ const r = await this.sb.from('quiz_groups').delete().in('id', dels); if(r.error) throw r.error; }
+      }catch(e){ __notifyErr('Grup buluta kaydedilemedi: ' + e.message); }
+    },
+    async syncQuestions(newArr){
+      if(!this.sb){ this.questions = newArr.map(q => Object.assign({}, q)); return; }
+      const newIds = new Set(newArr.map(q => q.id));
+      const dels = this.questions.map(q => q.id).filter(id => !newIds.has(id));
+      this.questions = newArr.map(q => Object.assign({}, q));
+      try{
+        if(newArr.length){ const r = await this.sb.from('quiz_questions').upsert(newArr.map(this._qToDb)); if(r.error) throw r.error; }
+        if(dels.length){ const r = await this.sb.from('quiz_questions').delete().in('id', dels); if(r.error) throw r.error; }
+      }catch(e){ __notifyErr('Soru buluta kaydedilemedi: ' + e.message); }
+    }
+  };
+
+  // Gruplar ve sorular artık localStorage yerine bulut önbelleğinden gelir
+  Storage.loadGroups    = function(){ return Cloud.groups.map(g => Object.assign({}, g)); };
+  Storage.saveGroups    = function(g){ Cloud.syncGroups(g); return true; };
+  Storage.loadQuestions = function(){ return Cloud.questions.map(q => Object.assign({}, q)); };
+  Storage.saveQuestions = function(q){ Cloud.syncQuestions(q); return true; };
+
   let __appStarted = false;
   window.MathApp = {
-    init: function () {
+    setClient: function (sb) { Cloud.setClient(sb); },
+    init: async function () {
       if (__appStarted) return;
       __appStarted = true;
+      const cw = document.getElementById('contentWrapper');
+      if (cw) cw.innerHTML = '<div style="text-align:center; padding:60px 20px; font-weight:700; color:var(--lego-black);">☁️ Veriler yükleniyor…</div>';
+      await Cloud.preload();
       init();
     }
   };
 })();
 </script>
 
+<script src="config.js"></script>
 <script>
 /* =====================================================================
    GİRİŞ + ŞİFRE YÖNETİMİ + GELİŞİM TAKİBİ  (Supabase)
@@ -2263,13 +2318,38 @@
       create policy "kendi cevaplarini ekle"  on answers
         for insert with check (auth.uid() = user_id);
 
+   2b) Soruları/grupları da buluta taşımak için şu tabloları oluşturun:
+
+      create table quiz_groups (
+        id text primary key,
+        name text not null,
+        emoji text,
+        color text,
+        created_at timestamptz default now()
+      );
+      create table quiz_questions (
+        id text primary key,
+        group_id text references quiz_groups(id) on delete cascade,
+        text text not null,
+        options jsonb not null,
+        correct_index int not null,
+        image text,
+        created_at timestamptz default now()
+      );
+      alter table quiz_groups    enable row level security;
+      alter table quiz_questions enable row level security;
+      create policy "gruplari oku" on quiz_groups    for select to authenticated using (true);
+      create policy "gruplari yaz" on quiz_groups    for all    to authenticated using (true) with check (true);
+      create policy "sorulari oku" on quiz_questions for select to authenticated using (true);
+      create policy "sorulari yaz" on quiz_questions for all    to authenticated using (true) with check (true);
+
    3) Şifre sıfırlama için Authentication > URL Configuration bölümüne
       sitenizin adresini "Redirect URLs" olarak ekleyin
       (örn. https://kullaniciadi.github.io/repo-adi/).
    ===================================================================== */
 
-const SUPABASE_URL      = "https://fnpzxhpryksjxduhejtx.supabase.co";   // örn: https://abcd1234.supabase.co
-const SUPABASE_ANON_KEY = "sb_publishable_GY7YWCQ7EHGbuyDYdbDXww_r60wNzPS";       // "anon public" anahtarı
+const SUPABASE_URL      = (window.APP_CONFIG && window.APP_CONFIG.SUPABASE_URL)      || "BURAYA_SUPABASE_URL";   // config.js'ten okunur
+const SUPABASE_ANON_KEY = (window.APP_CONFIG && window.APP_CONFIG.SUPABASE_ANON_KEY) || "BURAYA_ANON_KEY";       // config.js'ten okunur
 
 (function () {
   'use strict';
@@ -2507,7 +2587,13 @@ const SUPABASE_ANON_KEY = "sb_publishable_GY7YWCQ7EHGbuyDYdbDXww_r60wNzPS";     
     const displayName=(user.user_metadata&&user.user_metadata.display_name)||(user.email?user.email.split("@")[0]:"Öğrenci");
     $("tbUserName").textContent="👋 "+displayName;
     $("authControls").style.display="flex";
-    if(!started){ started=true; if(window.MathApp&&window.MathApp.init) window.MathApp.init(); }
+    if(!started){
+      started=true;
+      if(window.MathApp){
+        if(window.MathApp.setClient) window.MathApp.setClient(sb);
+        if(window.MathApp.init) window.MathApp.init();
+      }
+    }
   }
 
   /* ---------- Oturum takibi ---------- */
