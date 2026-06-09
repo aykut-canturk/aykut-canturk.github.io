@@ -2617,7 +2617,16 @@ const RESET_PASSWORD_REDIRECT_TO = (window.APP_CONFIG && window.APP_CONFIG.RESET
     try{
       const payload = { email: email, fullName: fullName };
       const res = await sb.functions.invoke(INVITE_FUNCTION_NAME, { body: payload });
-      if(res.error) throw res.error;
+      if (res.error) {
+        let detailedError = res.error.message || "Davet gönderilemedi.";
+        try {
+          if (res.error.context && typeof res.error.context.json === 'function') {
+            const errBody = await res.error.context.json();
+            if (errBody && errBody.error) detailedError = errBody.error;
+          }
+        } catch (_) {}
+        throw new Error(detailedError);
+      }
       setInviteMsg("Davet gönderildi ✓", "ok");
       Toast.show("Davet e-postası gönderildi", "success");
       setTimeout(function(){ closeInviteModal(); }, 700);
